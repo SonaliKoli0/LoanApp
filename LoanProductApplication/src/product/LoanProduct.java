@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import databaseConnector.LoanProductSQL;
-import databaseConnector.ProductSQL;
-import databaseConnector.ScheduleSQL;
 import utils.Util;
 
 import java.util.ArrayList;
@@ -95,8 +93,10 @@ public class LoanProduct extends Product {
 		return str;
 	}
 
-	// updates product details using the product id given by user and the
-	// details user want to update
+	/**
+	 * updates product details using the product id given by user and the  details user want to update
+	 */
+	
 	@Override
 	public void updateProduct(int productId) {
 		try {
@@ -108,19 +108,23 @@ public class LoanProduct extends Product {
 
 	}
 
-	// creates the product using the product details given by user
+	/**
+	 *  creates the product using the product details given by user
+	 */
 	@Override
 	public void createProduct() {
 
 		try {
-			ProductSQL.insert(this);
+			LoanProductSQL.insertLoanProduct(this);
 		} catch (Exception e) {
 
 			e.printStackTrace();
 		}
 	}
 
-	// Returns the product details using the productId
+	/**
+	 *  Returns the product details using the productId
+	 */
 	@Override
 	public Product readProduct(int id) {
 		Product lp = null;
@@ -134,7 +138,9 @@ public class LoanProduct extends Product {
 		return lp;
 	}
 
-	// Deletes product by using productId
+	/**
+	 *  Deletes product by using productId
+	 */
 	@Override
 	public void deleteProduct(int ProductId) {
 
@@ -147,14 +153,6 @@ public class LoanProduct extends Product {
 		}
 	}
 
-	// Method for adding the re-payment details
-	public void repayAmount(int loanId, Double amount, Date date) {
-		try {
-			ScheduleSQL.insertRepaymentSchedule(loanId, amount, Util.toSQLDate(date));
-		} catch (Exception e) {
-			System.out.println("Loan id does not exist");
-		}
-	}
 	@Override
 	public void getCashflow(int productId,Date date){
 		LoanProduct lp= (LoanProduct)LoanProductSQL.readProduct(productId);
@@ -168,7 +166,7 @@ public class LoanProduct extends Product {
 	public String toString() {
 		return "LoanProduct{" +
 
-				"loanId=" + getLoanId() + ", rate=" + rate + ",Start Date=" + Util.formatDate(getStartDate())
+				"productId="+ this.getProductId() + ", loanId=" + getLoanId() + ", rate=" + rate + ",Start Date=" + Util.formatDate(getStartDate())
 				+ ",End Date=" + Util.formatDate(getEndDate()) + ", totalValue=" + totalValue
 				+ ", disbursementSchedule= " + disbursementSchedule + '}';
 	}

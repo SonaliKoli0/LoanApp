@@ -16,14 +16,20 @@ import utils.Util;
 
 public class ProductSQL {
 	protected static final String SAVE_PRODUCT = "INSERT INTO Product (productType, startDate, endDate) VALUES (?, ?, ?)";
-    //Method to insert the product in to the database
+
+	/**
+	 *  Method to insert the product in to the database
+	 * @param p
+	 * @throws Exception
+	 */
 	public static void insert(Product p) throws Exception {
 		PreparedStatement stmt = null;
 		int j = 1;
 		long id = -1;
+		Connection con = null;
 
 		try {
-			Connection con = DatabaseHelper.getConnection();
+			con = DatabaseHelper.getConnection();
 			stmt = con.prepareStatement(SAVE_PRODUCT, Statement.RETURN_GENERATED_KEYS);
 			if (p.getStartDate() != null) {
 				stmt.setString(j++, p.getProductType());
@@ -59,11 +65,15 @@ public class ProductSQL {
 			throw e;
 		} finally {
 
-			DbUtils.close(stmt);
+			DbUtils.close(stmt, con);
 		}
-		LoanProductSQL.insertLoanProduct(p);
 	}
-    //Method to get the product details from the database based on the productId
+	
+	/**
+	 *  Method to get the product details from the database based on the productId
+	 * @param id
+	 * @return
+	 */
 	public static Product readProduct(int id) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -97,18 +107,15 @@ public class ProductSQL {
 					e.printStackTrace();
 				}
 			}
-			DbUtils.close(stmt);
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			DbUtils.close(stmt, con);
 		}
 		return p;
 	}
-    //Method to delete the product details from the database based on the productId
+
+	/**
+	 *  Method to delete the product details from the database based on the productId
+	 * @param id
+	 */
 	public static void deleteProduct(int id) {
 		PreparedStatement stmt = null;
 
@@ -125,65 +132,40 @@ public class ProductSQL {
 			e.printStackTrace();
 		} finally {
 
-			DbUtils.close(stmt);
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			DbUtils.close(stmt, con);
 		}
 
 	}
-	//Method to delete the product details from the database based on the productId
-	public static void updateProduct( int id) {
+
+	/**
+	 *  Method to delete the product details from the database based on the productId
+	 * @param id
+	 */
+	public static void updateProduct(int id) {
 		int index = 1;
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
-			String a="UPDATE product SET";
-			if (AppStarter.inputs.containsKey("startDate")) {
-				a+=" startDate =?";
-			} 
-			else if (AppStarter.inputs.containsKey("endDate")) {
-				a+=" endDate =?";
-			}
-			else{
-				return;
-			}
-			a+=" WHERE PRODUCT_ID = ?";
-			
-			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement(a);
-			
-			if (AppStarter.inputs.containsKey("startDate")) {
-				stmt.setDate(index++, Util.toSQLDate(Util.parseDate(AppStarter.inputs.get("startDate"))));
-			} 
+			String sql = "UPDATE product SET";
 			if (AppStarter.inputs.containsKey("endDate")) {
+				sql += " endDate =?";
+			}
+			sql += " WHERE PRODUCT_ID = ?";
+
+			con = DatabaseHelper.getConnection();
+			stmt = con.prepareStatement(sql);
+
+			 if (AppStarter.inputs.containsKey("endDate")) {
 				stmt.setDate(index++, Util.toSQLDate(Util.parseDate(AppStarter.inputs.get("endDate"))));
-			} 
-//			Date oldStartDate = (Date) p.getStartDate();
-//			Date oldEndDate = (Date) p.getEndDate();
+			}
 			stmt.setInt(index++, id);
 			stmt.executeUpdate();
 			System.out.println("product updated successfully");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			DbUtils.close(stmt);
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			DbUtils.close(stmt, con);
 		}
 	}
-
-
-	
-	
 
 }
