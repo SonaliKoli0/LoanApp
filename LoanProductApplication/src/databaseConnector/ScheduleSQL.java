@@ -28,7 +28,7 @@ public class ScheduleSQL {
 	 */
 	public static void insertDisbursementSchedule(Product p) throws Exception {
 		PreparedStatement stmt = null;
-		long id = -1;
+		
 		int affectedRows = 0;
 		LoanProduct lp = (LoanProduct) p;
 		Connection con = null;
@@ -50,17 +50,6 @@ public class ScheduleSQL {
 			if (affectedRows == 0) {
 				throw new SQLException("Inserting product failed, no rows affected.");
 			}
-			try (ResultSet generatedKeys = stmt
-					.executeQuery("SELECT product_id FROM Product WHERE rownum = 1 ORDER BY product_id DESC")) {
-				if (generatedKeys.next()) {
-					id = generatedKeys.getLong("product_id");
-
-					p.setProductId((int) id);
-				} else {
-					throw new SQLException("Inserting product failed, no ID obtained.");
-				}
-			}
-
 		} catch (Exception e) {
 			throw e;
 		} finally {

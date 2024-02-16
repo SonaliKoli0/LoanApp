@@ -2,7 +2,9 @@ package utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -56,5 +58,26 @@ public class Util {
 	YearMonth yearMonthObject1 = YearMonth.of(year,month);
 	 int daysInMonth = yearMonthObject1.lengthOfMonth();
 	 return daysInMonth;
+	}
+	public static LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+	    return dateToConvert.toInstant()
+	      .atZone(ZoneId.systemDefault())
+	      .toLocalDate();
+	}
+	public static LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {
+	    return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
+	}
+	public static Date convertLocalDateToUtil(LocalDate currentMonth){
+		if (currentMonth == null) {
+			return null;
+		}
+		
+			try {
+				return new SimpleDateFormat("yyyy-MM-dd").parse(currentMonth+"");
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return null;
 	}
 }

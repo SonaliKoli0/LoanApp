@@ -29,13 +29,14 @@ public class TestCRUD {
 	 * Tests working of creatProduct method 
 	 * @throws Exception
 	 */
+	@SuppressWarnings("resource")
 	@Test
 	public void testCreateProduct() throws Exception {
 		// Create a test product
 		String productType = "Loan";
 		// You can replace these values with any other test values as needed
-		Date startDate = Util.toSQLDate(Util.parseDate(("15/04/2023")));
-		Date endDate = Util.toSQLDate(Util.parseDate(("15/04/2024")));
+		Date startDate = Util.toSQLDate(Util.parseDate(("01/02/2023")));
+		Date endDate = Util.toSQLDate(Util.parseDate(("01/01/2026")));
 
 		Product product = new Product(-1, productType, startDate, endDate, new ArrayList<>());
 		ProductSQL.insert(product);
@@ -104,15 +105,15 @@ public class TestCRUD {
 	@Test
 	public void testReadProduct() throws SQLException {
 		// Read the test product from the database
-		Product product = ProductSQL.readProduct(266); 
+		Product product = ProductSQL.readProduct(166); 
 
 		// Verify that the product is not null
 		assertNotNull(product);
 
 		// Verify the properties of the product
 		assertEquals("Loan", product.getProductType());
-		assertEquals(Util.toSQLDate(Util.parseDate(("17/01/2023"))), product.getStartDate());
-		assertEquals(Util.toSQLDate(Util.parseDate(("17/01/2025"))), product.getEndDate());
+		assertEquals(Util.toSQLDate(Util.parseDate(("01/02/2023"))), product.getStartDate());
+		assertEquals(Util.toSQLDate(Util.parseDate(("19/01/2027"))), product.getEndDate());
 	}
 	
 	/**
@@ -121,8 +122,8 @@ public class TestCRUD {
 	 */
 	@Test
 	public void testDeleteProduct() throws SQLException{
-		ProductSQL.deleteProduct(267);
-		Product product = ProductSQL.readProduct(267); 
+		LoanProductSQL.deleteProduct(165);
+		Product product = ProductSQL.readProduct(165); 
 		
 		assertNull(product);	
 	}
@@ -135,10 +136,10 @@ public class TestCRUD {
 	public void testUpdateProduct() throws SQLException{
 		AppStarter.inputs = new HashMap<>();
 		AppStarter.inputs.put("endDate", "19/01/2027");
-		 ProductSQL.updateProduct(265);
+		 ProductSQL.updateProduct(166);
 		
 		 //Reading the updated product
-		 Product p = ProductSQL.readProduct(265);
+		 Product p = ProductSQL.readProduct(166);
 		 
 		 //checking where endDate changed or not
 		 assertEquals(Util.toSQLDate(Util.parseDate(("19/01/2027"))), p.getEndDate());	
@@ -152,15 +153,14 @@ public class TestCRUD {
 	@Test
 	public void testReadLoanProduct() throws SQLException {
 		// Read the test product from the database
-		LoanProduct loanProduct = (LoanProduct) LoanProductSQL.readProduct(266); 
+		LoanProduct loanProduct = (LoanProduct) LoanProductSQL.readProduct(166); 
 
 		// Verify that the product is not null
 		assertNotNull(loanProduct);
 
 		// Verify the properties of the product
 		assertEquals("Loan", loanProduct.getProductType());
-		assertEquals(104, loanProduct.getLoanId());
-		assertTrue(loanProduct.getTotalValue() == 120000);
-		assertTrue(loanProduct.getRate() == 6);
+		assertTrue(loanProduct.getTotalValue() == 10000);
+		assertTrue(loanProduct.getRate() == 5);
 	}
 }

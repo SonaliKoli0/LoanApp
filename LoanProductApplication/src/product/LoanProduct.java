@@ -113,13 +113,14 @@ public class LoanProduct extends Product {
 	 */
 	@Override
 	public void createProduct() {
-
+		
 		try {
 			LoanProductSQL.insertLoanProduct(this);
 		} catch (Exception e) {
 
 			e.printStackTrace();
 		}
+		
 	}
 
 	/**
@@ -156,8 +157,12 @@ public class LoanProduct extends Product {
 	@Override
 	public void getCashflow(int productId,Date date){
 		LoanProduct lp= (LoanProduct)LoanProductSQL.readProduct(productId);
-		LoanCashflow.generateCashflows(lp.getLoanId(),date,lp.getRate());
-		
+		ArrayList<Cashflow> cashflows=LoanCashflow.generateCashflows(lp);
+		lp.setCashflows(cashflows);
+		for(int i=0;i<cashflows.size();i++){
+			LoanCashflow cashflow=(LoanCashflow)cashflows.get(i);
+			System.out.println(cashflow);
+		}
 		
 	}
 
