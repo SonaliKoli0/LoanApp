@@ -94,9 +94,10 @@ public class LoanProduct extends Product {
 	}
 
 	/**
-	 * updates product details using the product id given by user and the  details user want to update
+	 * updates product details using the product id given by user and the
+	 * details user want to update
 	 */
-	
+
 	@Override
 	public void updateProduct(int productId) {
 		try {
@@ -109,22 +110,22 @@ public class LoanProduct extends Product {
 	}
 
 	/**
-	 *  creates the product using the product details given by user
+	 * creates the product using the product details given by user
 	 */
 	@Override
 	public void createProduct() {
-		
+
 		try {
 			LoanProductSQL.insertLoanProduct(this);
 		} catch (Exception e) {
 
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	/**
-	 *  Returns the product details using the productId
+	 * Returns the product details using the productId
 	 */
 	@Override
 	public Product readProduct(int id) {
@@ -140,7 +141,7 @@ public class LoanProduct extends Product {
 	}
 
 	/**
-	 *  Deletes product by using productId
+	 * Deletes product by using productId
 	 */
 	@Override
 	public void deleteProduct(int ProductId) {
@@ -153,17 +154,17 @@ public class LoanProduct extends Product {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public void getCashflow(int productId,Date date){
-		LoanProduct lp= (LoanProduct)LoanProductSQL.readProduct(productId);
-		ArrayList<Cashflow> cashflows=LoanCashflow.generateCashflows(lp);
+	
+	public void getCashflow(int productId, Date date, String cashflowType) {
+		LoanProduct lp = (LoanProduct) LoanProductSQL.readProduct(productId);
+		
+		ArrayList<Cashflow> cashflows = LoanCashflow.generateCashflows(lp, cashflowType);
 		lp.setCashflows(cashflows);
-		for(int i=0;i<cashflows.size();i++){
-			LoanCashflow cashflow=(LoanCashflow)cashflows.get(i);
+		for (int i = 0; i < cashflows.size(); i++) {
+			LoanCashflow cashflow = (LoanCashflow) cashflows.get(i);
 			System.out.println(cashflow);
 		}
-		
+
 	}
 
 	// Method for printing the loan product details
@@ -171,9 +172,9 @@ public class LoanProduct extends Product {
 	public String toString() {
 		return "LoanProduct{" +
 
-				"productId="+ this.getProductId() + ", loanId=" + getLoanId() + ", rate=" + rate + ",Start Date=" + Util.formatDate(getStartDate())
-				+ ",End Date=" + Util.formatDate(getEndDate()) + ", totalValue=" + totalValue
-				+ ", disbursementSchedule= " + disbursementSchedule + '}';
+				"productId=" + this.getProductId() + ", loanId=" + getLoanId() + ", rate=" + rate + ",Start Date="
+				+ Util.formatDate(getStartDate()) + ",End Date=" + Util.formatDate(getEndDate()) + ", totalValue="
+				+ totalValue + ", disbursementSchedule= " + disbursementSchedule + '}';
 	}
 
 }

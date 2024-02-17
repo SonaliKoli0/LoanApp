@@ -124,7 +124,9 @@ public class Product {
 		case Product.CASHFLOW: {
 			LoanProduct loanProduct = (LoanProduct) product;
 			Date date = Util.parseDate(AppStarter.inputs.get("Date"));
-			loanProduct.getCashflow(loanProduct.getProductId(), date);
+			String cashflowType = AppStarter.inputs.get("cashflowType");
+			System.out.println(cashflowType);
+			loanProduct.getCashflow(loanProduct.getProductId(), date, cashflowType);
 		}
 			break;
 		case Product.AMEND: {
@@ -167,6 +169,7 @@ public class Product {
 
 	public static LoanProduct createLoanProduct(HashMap<String, String> inputs) throws Exception {
 		String productType = inputs.get("productType");
+		String cashflowType = inputs.get("cashflowType");
 		Date startDate = Util.parseDate(inputs.get("startDate"));
 		Date endDate = Util.parseDate(inputs.get("endDate"));
 		double rate = Double.parseDouble(inputs.get("rate"));
@@ -216,6 +219,11 @@ public class Product {
 	}
 
 	public void createLoanProduct() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void getCashflow(int productId, Date date, String cashFlowType) {
 		// TODO Auto-generated method stub
 		
 	}
