@@ -17,7 +17,7 @@ import utils.DbUtils;
 
 public class LoanProductSQL extends ProductSQL {
 
-	protected static final String SAVE_LOAN_PRODUCT = "INSERT INTO  LOANPRODUCT (productId,loanvalue,interestrate) VALUES (?,?,?)";
+	protected static final String SAVE_LOAN_PRODUCT = "INSERT INTO  LOANPRODUCT (productId,loanvalue,interestrate,payment_type) VALUES (?,?,?,?)";
 	protected static final String READ_LOAN_PRODUCT = "SELECT * FROM LOANPRODUCT INNER JOIN PRODUCT ON LOANPRODUCT.PRODUCTID=PRODUCT.PRODUCT_ID WHERE LOANPRODUCT.PRODUCTID=? ";
 
 	/**
@@ -39,6 +39,7 @@ public class LoanProductSQL extends ProductSQL {
 				stmt.setInt(j++, p.getProductId());
 				stmt.setInt(j++, (int) lp.getTotalValue());
 				stmt.setInt(j++, (int) lp.getRate());
+				stmt.setString(j++, lp.getPaymentOption());
 
 			} else {
 				stmt.setNull(j++, Types.DATE);
@@ -132,8 +133,9 @@ public class LoanProductSQL extends ProductSQL {
 				int loanId = rs.getInt("LOANID");
 				Long totalValue = rs.getLong("LOANVALUE");
 				Double rate = rs.getDouble("INTERESTRATE");
+				String option =rs.getString("PAYMENT_TYPE");
 				List<Schedule> ls = ScheduleSQL.readDisbursementSchedule(loanId);
-				lp = new LoanProduct(lp, loanId, totalValue, rate, ls);
+				lp = new LoanProduct(lp, loanId, totalValue, rate, ls,option);
 				System.out.println("Product read successfully");
 
 			}

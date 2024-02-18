@@ -10,34 +10,37 @@ import java.util.ArrayList;
 
 public class LoanProduct extends Product {
 
-	private int loanId;
-	private double rate;
-	private double totalValue;
-	private List<Schedule> disbursementSchedule;
-	private Schedule schedule;
+	protected int loanId;
+	protected double rate;
+	protected double totalValue;
+	protected List<Schedule> disbursementSchedule;
+	protected Schedule schedule;
+	protected String paymentOption;
 
 	public LoanProduct() {
 
 	}
 
 	public LoanProduct(int productId, int loanId, Date startDate, Date endDate, String productType, double totalValue,
-			double rate, List<Schedule> disbursementSchedule, ArrayList<Cashflow> cashflows) {
+			double rate, List<Schedule> disbursementSchedule, ArrayList<Cashflow> cashflows,String paymentOption) {
 
 		super(productId, productType, startDate, endDate, cashflows);
 		this.loanId = loanId;
 		this.rate = rate;
 		this.totalValue = totalValue;
 		this.disbursementSchedule = disbursementSchedule;
+		this.paymentOption=paymentOption;
 
 	}
 
-	public LoanProduct(Product p, int loanId, double totalValue, double rate, List<Schedule> disbursementSchedule) {
+	public LoanProduct(Product p, int loanId, double totalValue, double rate, List<Schedule> disbursementSchedule,String paymentOption) {
 
 		super(p);
 		this.loanId = loanId;
 		this.rate = rate;
 		this.totalValue = totalValue;
 		this.disbursementSchedule = disbursementSchedule;
+		this.paymentOption=paymentOption;
 
 	}
 
@@ -155,9 +158,10 @@ public class LoanProduct extends Product {
 	}
 
 	@Override
-	public void getCashflow(int productId,Date date){
-		LoanProduct lp= (LoanProduct)LoanProductSQL.readProduct(productId);
-		ArrayList<Cashflow> cashflows=LoanCashflow.generateCashflows(lp);
+	public void getCashflow(int productId){
+		Product lp= (LoanProduct)LoanProductSQL.readProduct(productId);
+		Cashflow cs=new LoanCashflow();
+		ArrayList<Cashflow> cashflows=cs.generateCashflows(lp);
 		lp.setCashflows(cashflows);
 		for(int i=0;i<cashflows.size();i++){
 			LoanCashflow cashflow=(LoanCashflow)cashflows.get(i);
@@ -173,7 +177,15 @@ public class LoanProduct extends Product {
 
 				"productId="+ this.getProductId() + ", loanId=" + getLoanId() + ", rate=" + rate + ",Start Date=" + Util.formatDate(getStartDate())
 				+ ",End Date=" + Util.formatDate(getEndDate()) + ", totalValue=" + totalValue
-				+ ", disbursementSchedule= " + disbursementSchedule + '}';
+				+ ", disbursementSchedule= " + disbursementSchedule + " ,"+"Payment Option: " + paymentOption + '}';
+	}
+
+	public String getPaymentOption() {
+		return paymentOption;
+	}
+
+	public void setPaymentOption(String paymentOption) {
+		this.paymentOption = paymentOption;
 	}
 
 }

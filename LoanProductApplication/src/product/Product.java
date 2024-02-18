@@ -123,8 +123,8 @@ public class Product {
 			break;
 		case Product.CASHFLOW: {
 			LoanProduct loanProduct = (LoanProduct) product;
-			Date date = Util.parseDate(AppStarter.inputs.get("Date"));
-			loanProduct.getCashflow(loanProduct.getProductId(), date);
+			//Date date = Util.parseDate(AppStarter.inputs.get("Date"));
+			loanProduct.getCashflow(loanProduct.getProductId());
 		}
 			break;
 		case Product.AMEND: {
@@ -160,7 +160,7 @@ public class Product {
 	}
 
 	// Method for generating cash flow
-	protected void getCashflow(int productId, Date date) {
+	protected void getCashflow(int productId) {
 		// TODO Auto-generated method stub
 
 	}
@@ -172,6 +172,7 @@ public class Product {
 		double rate = Double.parseDouble(inputs.get("rate"));
 		double totalValue = Double.parseDouble(inputs.get("totalValue"));
 		String schedule = inputs.get("schedule");
+		String paymentOption=inputs.get("paymentOption");
 		String[] scheduleArray = schedule.split("\\.");
 		List<Schedule> disbursementSchedule = new ArrayList<Schedule>();
 		for (String s : scheduleArray) {
@@ -183,7 +184,7 @@ public class Product {
 		}
 
 		LoanProduct loanProduct = new LoanProduct(-1, -1, startDate, endDate, productType, totalValue, rate,
-				disbursementSchedule, null);
+				disbursementSchedule, null,paymentOption);
 		return loanProduct;
 	}
 
