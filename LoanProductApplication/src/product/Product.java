@@ -123,14 +123,14 @@ public class Product {
 			break;
 		case Product.CASHFLOW: {
 			LoanProduct loanProduct = (LoanProduct) product;
-			//Date date = Util.parseDate(AppStarter.inputs.get("Date"));
+			// Date date = Util.parseDate(AppStarter.inputs.get("Date"));
 			loanProduct.getCashflow(loanProduct.getProductId());
 		}
 			break;
 		case Product.AMEND: {
 			LoanProduct loanProduct = (LoanProduct) product;
 			int id = product.getProductId();
-			loanProduct =  (LoanProduct) loanProduct.readProduct(id);
+			loanProduct = (LoanProduct) loanProduct.readProduct(id);
 			loanProduct.updateProduct(id);
 			loanProduct.setProductId(id);
 			callAction(Product.READ, loanProduct);
@@ -172,8 +172,8 @@ public class Product {
 		double rate = Double.parseDouble(inputs.get("rate"));
 		double totalValue = Double.parseDouble(inputs.get("totalValue"));
 		String schedule = inputs.get("schedule");
-		String paymentOption=inputs.get("paymentOption");
-		String[] scheduleArray = schedule.split("\\.");
+		String paymentOption = inputs.get("paymentOption");
+		String[] scheduleArray = schedule.split("\\_");
 		List<Schedule> disbursementSchedule = new ArrayList<Schedule>();
 		for (String s : scheduleArray) {
 			Schedule sch = new Schedule();
@@ -182,9 +182,10 @@ public class Product {
 			sch.setAmount(Double.parseDouble(oneSchedule[1]));
 			disbursementSchedule.add(sch);
 		}
+		Product.inputValidation(startDate, endDate, totalValue, rate, disbursementSchedule);
 
 		LoanProduct loanProduct = new LoanProduct(-1, -1, startDate, endDate, productType, totalValue, rate,
-				disbursementSchedule, null,paymentOption);
+				disbursementSchedule, null, paymentOption);
 		return loanProduct;
 	}
 
@@ -209,6 +210,24 @@ public class Product {
 		return null;
 	}
 
+	public static void inputValidation(Date startDate, Date endDate, double totalValue, double rate,
+			List<Schedule> disbursementSchedule) {
+		if (startDate.compareTo(endDate) != -1) {
+			System.err.print("start Date cannot be greater than or equal to endDate!!");
+			System.exit(0);
+		}
+
+		double checkTotalValue = 0;
+		for (int i = 0; i < disbursementSchedule.size(); i++) {
+			checkTotalValue += disbursementSchedule.get(i).getAmount();
+		}
+
+		if (totalValue != checkTotalValue) {
+			System.err.print("Total of disbursed amount should be equals to TotalLoanValue!!");
+			System.exit(0);
+		}
+	}
+
 	// for printing product details
 	@Override
 	public String toString() {
@@ -218,7 +237,7 @@ public class Product {
 
 	public void createLoanProduct() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

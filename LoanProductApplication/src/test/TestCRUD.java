@@ -105,15 +105,15 @@ public class TestCRUD {
 	@Test
 	public void testReadProduct() throws SQLException {
 		// Read the test product from the database
-		Product product = ProductSQL.readProduct(166); 
+		Product product = ProductSQL.readProduct(300); 
 
 		// Verify that the product is not null
 		assertNotNull(product);
 
 		// Verify the properties of the product
 		assertEquals("Loan", product.getProductType());
-		assertEquals(Util.toSQLDate(Util.parseDate(("01/02/2023"))), product.getStartDate());
-		assertEquals(Util.toSQLDate(Util.parseDate(("19/01/2027"))), product.getEndDate());
+		assertEquals(Util.toSQLDate(Util.parseDate(("01/01/2026"))), product.getStartDate());
+		assertEquals(Util.toSQLDate(Util.parseDate(("01/01/2027"))), product.getEndDate());
 	}
 	
 	/**
@@ -122,8 +122,8 @@ public class TestCRUD {
 	 */
 	@Test
 	public void testDeleteProduct() throws SQLException{
-		LoanProductSQL.deleteProduct(165);
-		Product product = ProductSQL.readProduct(165); 
+		LoanProductSQL.deleteProduct(289);
+		Product product = ProductSQL.readProduct(289); 
 		
 		assertNull(product);	
 	}
