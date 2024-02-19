@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import databaseConnector.ScheduleSQL;
 import utils.Util;
@@ -183,7 +184,22 @@ public class LoanCashflow extends Cashflow {
 			ls.add(lc2);
 		}
 	}
-
+	
+	@Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        LoanCashflow other = (LoanCashflow) obj;
+        return productId == other.productId && 
+               Objects.equals(date, other.date) && 
+               Objects.equals(type, other.type) && 
+               Objects.equals(direction, other.direction) && 
+               Double.compare(principal, other.getPrincipal()) == 0;
+    }
+	
+	@Override
 	public String toString() {
 		return this.getProductId() + "\t" + this.getDirection() + "\t" + Util.formatDate(this.getDate()) + "\t"
 				+ this.getType() + "\t" + this.getPrincipal();
