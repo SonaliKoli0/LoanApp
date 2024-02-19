@@ -45,17 +45,18 @@ public class Product {
 		this.cashflows = cashflows;
 		this.productType = productType;
 	}
-    
-	
+
 	// returns productId
 	public int getProductId() {
 		return productId;
 	}
-    // sets productId
+
+	// sets productId
 	public void setProductId(int productId) {
 		this.productId = productId;
 	}
-    //returns start date 
+
+	// returns start date
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -87,6 +88,7 @@ public class Product {
 	public void setCashflows(ArrayList<Cashflow> cashflows) {
 		this.cashflows = cashflows;
 	}
+
 	public String getProductType() {
 		return productType;
 	}
@@ -96,136 +98,146 @@ public class Product {
 	}
 
 	public List<Schedule> getDisbursementSchedule() {
-		
+
 		return null;
 	}
-	
-	
-	
-	
-	
-    // calls the action user want to perform
-	public void callAction(String Action, Product p) {
-		switch (Action) {
-		case "REPAY":
-			if (p instanceof LoanProduct) {
-				LoanProduct lp = (LoanProduct) p;
-				Schedule sch = lp.getSchedule();
 
-				lp.repayAmount(sch.getId(), sch.getAmount(), sch.getDate());
-			}
+	/**
+	 * method calls the corresponding action that user wants to perform.
+	 * 
+	 * @param Action
+	 * @param p
+	 */
+	public void callAction(String Action, Product product) {
+		switch (Action) {
+		case Product.READ: {
+			Product loanProduct = (LoanProduct) product;
+			loanProduct = loanProduct.readProduct(loanProduct.getProductId());
+			System.out.println(loanProduct);
+		}
 			break;
-		case Product.READ:
-			{Product lp = (LoanProduct) p;
-			lp = lp.readProduct(lp.getProductId());
-			System.out.println(lp);}
+		case Product.REMOVE: {
+			Product loanProduct = (LoanProduct) product;
+			loanProduct.deleteProduct(loanProduct.getProductId());
+		}
 			break;
-		case Product.REMOVE:
-			{Product lp1 = (LoanProduct) p;
-			lp1.deleteProduct(lp1.getProductId());}
+		case Product.CASHFLOW: {
+			LoanProduct loanProduct = (LoanProduct) product;
+			// Date date = Util.parseDate(AppStarter.inputs.get("Date"));
+			loanProduct.getCashflow(loanProduct.getProductId());
+		}
 			break;
-		case Product.CASHFLOW:
-			LoanProduct lp1=(LoanProduct) p;
-			Date d=Util.parseDate(AppStarter.inputs.get("Date"));
-			lp1.getCashflow(lp1.getProductId(), d);
-			break;
-		case Product.AMEND:
-			LoanProduct loanProduct = (LoanProduct) p;
-			int id = p.getProductId();
+		case Product.AMEND: {
+			LoanProduct loanProduct = (LoanProduct) product;
+			int id = product.getProductId();
 			loanProduct = (LoanProduct) loanProduct.readProduct(id);
-			loanProduct.updateProduct( id);
+			loanProduct.updateProduct(id);
 			loanProduct.setProductId(id);
 			callAction(Product.READ, loanProduct);
+		}
 			break;
 		default:
 			break;
 		}
 
 	}
-    // gives product details
+
+	// gives product details
 	protected Product readProduct(int productId) {
-		
 		return null;
-
 	}
-    //updates product using productId
+
+	// updates product using productId
 	protected void updateProduct(int productId) {
-	
-
 	}
-    //deletes product using productId
+
+	// deletes product using productId
 	protected void deleteProduct(int productId) {
-		
+	}
+
+	// creates product
+	protected void createProduct() {
+	}
+
+	// Method for generating cash flow
+	protected void getCashflow(int productId) {
+		// TODO Auto-generated method stub
 
 	}
-	//creates product
-	protected void createProduct(){
-		
-		
-	}
-	//Method for generating cash flow
-	protected void getCashflow(int productId, Date date) {
-		// TODO Auto-generated method stub
-		
-	}
-    // checks which action wants to perform and calls that action
-	public static Product checkAction(HashMap<String, String> inputs) throws Exception {
-		String action = inputs.get(Product.ACTION);
+
+	public static LoanProduct createLoanProduct(HashMap<String, String> inputs) throws Exception {
 		String productType = inputs.get("productType");
+		Date startDate = Util.parseDate(inputs.get("startDate"));
+		Date endDate = Util.parseDate(inputs.get("endDate"));
+		double rate = Double.parseDouble(inputs.get("rate"));
+		double totalValue = Double.parseDouble(inputs.get("totalValue"));
+		String schedule = inputs.get("schedule");
+		String paymentOption = inputs.get("paymentOption");
+		String[] scheduleArray = schedule.split("\\_");
+		List<Schedule> disbursementSchedule = new ArrayList<Schedule>();
+		for (String s : scheduleArray) {
+			Schedule sch = new Schedule();
+			String[] oneSchedule = s.split("=");
+			sch.setDate(Util.parseDate(oneSchedule[0]));
+			sch.setAmount(Double.parseDouble(oneSchedule[1]));
+			disbursementSchedule.add(sch);
+		}
+		Product.inputValidation(startDate, endDate, totalValue, rate, disbursementSchedule);
+
+		LoanProduct loanProduct = new LoanProduct(-1, -1, startDate, endDate, productType, totalValue, rate,
+				disbursementSchedule, null, paymentOption);
+		return loanProduct;
+	}
+
+	// checks which action wants to perform and calls that action
+	public static Product checkAction(HashMap<String, String> inputs) throws Exception {
+		String productType = inputs.get("productType");
+		String action = inputs.get(Product.ACTION);
+		LoanProduct loanProduct = new LoanProduct();
 		if (action.equals(Product.NEW)) {
 			if (productType.equals("Loan")) {
-				Date startDate = Util.parseDate(inputs.get("startDate"));
-				Date endDate = Util.parseDate(inputs.get("endDate"));
-				double rate = Double.parseDouble(inputs.get("rate"));
-				double totalValue = Double.parseDouble(inputs.get("totalValue"));
-				String schedule = inputs.get("schedule");
-				String[] scheduleArray = schedule.split("\\.");
-				List<Schedule> disbursementSchedule = new ArrayList<Schedule>();
-				for (String s : scheduleArray) {
-					Schedule sch = new Schedule();
-					String[] oneSchedule = s.split("=");
-					sch.setDate(Util.parseDate(oneSchedule[0]));
-					sch.setAmount(Double.parseDouble(oneSchedule[1]));
-					disbursementSchedule.add(sch);
-				}
-
-				LoanProduct lp = new LoanProduct(-1, -1, startDate, endDate, productType, totalValue, rate,
-						disbursementSchedule, null);
-				lp.createProduct();
-				System.out.println(lp);
-				return lp;
+				loanProduct = Product.createLoanProduct(inputs);
+				loanProduct.createProduct();
+				System.out.println(loanProduct);
+				return loanProduct;
 			}
 		} else {
-			if (productType.equals(Product.LOAN)) {
-				LoanProduct lp = new LoanProduct();
-
-				if (action.equals("REPAY")) {
-
-					Schedule sch = new Schedule();
-					sch.setId(Integer.parseInt(inputs.get("loanId")));
-					sch.setAmount(Double.parseDouble(inputs.get("amount")));
-					sch.setDate(Util.parseDate(inputs.get("date")));
-					lp.setSchedule(sch);
-				}else{
-				lp.setProductId(Integer.parseInt(inputs.get("productId")));}
-
-				lp.callAction(action, lp);
-				return lp;
-			}
-
+			loanProduct.setProductId(Integer.parseInt(inputs.get("productId")));
+			loanProduct.callAction(action, loanProduct);
+			return loanProduct;
 		}
-		return null;
 
+		return null;
 	}
-	
-	//for printing product details
+
+	public static void inputValidation(Date startDate, Date endDate, double totalValue, double rate,
+			List<Schedule> disbursementSchedule) {
+		if (startDate.compareTo(endDate) != -1) {
+			System.err.print("start Date cannot be greater than or equal to endDate!!");
+			System.exit(0);
+		}
+
+		double checkTotalValue = 0;
+		for (int i = 0; i < disbursementSchedule.size(); i++) {
+			checkTotalValue += disbursementSchedule.get(i).getAmount();
+		}
+
+		if (totalValue != checkTotalValue) {
+			System.err.print("Total of disbursed amount should be equals to TotalLoanValue!!");
+			System.exit(0);
+		}
+	}
+
+	// for printing product details
 	@Override
 	public String toString() {
 		return "Product{" + "productId=" + productId + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", + cashflows=" + cashflows + '}';
+				+ ", cashflows=" + cashflows + '}';
 	}
 
-	
+	public void createLoanProduct() {
+		// TODO Auto-generated method stub
 
+	}
 
 }

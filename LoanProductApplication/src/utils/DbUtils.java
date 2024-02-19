@@ -6,7 +6,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DbUtils {
-	// Method for creating new prepared statement for executing query
+	/**
+	 *  Method for creating new prepared statement for executing query
+	 * @param con
+	 * @param st
+	 * @return
+	 * @throws SQLException
+	 */
 	 public static PreparedStatement newPreparedStatement(Connection con, String st) throws SQLException {
 
 		if (con == null) {
@@ -22,14 +28,24 @@ public class DbUtils {
 		}
 		return stmt;
 	}
-	//Method to close the statement
-	 static public void close(Statement stmt) {
-			try {
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch (Exception e) {
-			}
-		}
-
+	/**
+	 * Method to close the statement
+	 * @param stmt
+	 * @param con
+	 */
+	 static public void close(Statement stmt, Connection con) {
+		 if (stmt != null) {
+			 try {
+				 stmt.close();
+			 } catch (Exception e) {
+			 }
+		 }
+		 if (con != null) {
+			 try {
+				 con.close();
+			 } catch (SQLException e) {
+				 e.printStackTrace();
+			 }
+		 }
+	 }
 }

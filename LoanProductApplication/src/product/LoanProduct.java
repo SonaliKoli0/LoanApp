@@ -4,42 +4,43 @@ import java.util.Date;
 import java.util.List;
 
 import databaseConnector.LoanProductSQL;
-import databaseConnector.ProductSQL;
-import databaseConnector.ScheduleSQL;
 import utils.Util;
 
 import java.util.ArrayList;
 
 public class LoanProduct extends Product {
 
-	private int loanId;
-	private double rate;
-	private double totalValue;
-	private List<Schedule> disbursementSchedule;
-	private Schedule schedule;
+	protected int loanId;
+	protected double rate;
+	protected double totalValue;
+	protected List<Schedule> disbursementSchedule;
+	protected Schedule schedule;
+	protected String paymentOption;
 
 	public LoanProduct() {
 
 	}
 
 	public LoanProduct(int productId, int loanId, Date startDate, Date endDate, String productType, double totalValue,
-			double rate, List<Schedule> disbursementSchedule, ArrayList<Cashflow> cashflows) {
+			double rate, List<Schedule> disbursementSchedule, ArrayList<Cashflow> cashflows,String paymentOption) {
 
 		super(productId, productType, startDate, endDate, cashflows);
 		this.loanId = loanId;
 		this.rate = rate;
 		this.totalValue = totalValue;
 		this.disbursementSchedule = disbursementSchedule;
+		this.paymentOption=paymentOption;
 
 	}
 
-	public LoanProduct(Product p, int loanId, double totalValue, double rate, List<Schedule> disbursementSchedule) {
+	public LoanProduct(Product p, int loanId, double totalValue, double rate, List<Schedule> disbursementSchedule,String paymentOption) {
 
 		super(p);
 		this.loanId = loanId;
 		this.rate = rate;
 		this.totalValue = totalValue;
 		this.disbursementSchedule = disbursementSchedule;
+		this.paymentOption=paymentOption;
 
 	}
 
@@ -95,8 +96,10 @@ public class LoanProduct extends Product {
 		return str;
 	}
 
-	// updates product details using the product id given by user and the
-	// details user want to update
+	/**
+	 * updates product details using the product id given by user and the  details user want to update
+	 */
+	
 	@Override
 	public void updateProduct(int productId) {
 		try {
@@ -108,19 +111,24 @@ public class LoanProduct extends Product {
 
 	}
 
-	// creates the product using the product details given by user
+	/**
+	 *  creates the product using the product details given by user
+	 */
 	@Override
 	public void createProduct() {
-
+		
 		try {
-			ProductSQL.insert(this);
+			LoanProductSQL.insertLoanProduct(this);
 		} catch (Exception e) {
 
 			e.printStackTrace();
 		}
+		
 	}
 
-	// Returns the product details using the productId
+	/**
+	 *  Returns the product details using the productId
+	 */
 	@Override
 	public Product readProduct(int id) {
 		Product lp = null;
@@ -134,7 +142,9 @@ public class LoanProduct extends Product {
 		return lp;
 	}
 
-	// Deletes product by using productId
+	/**
+	 *  Deletes product by using productId
+	 */
 	@Override
 	public void deleteProduct(int ProductId) {
 
@@ -147,19 +157,16 @@ public class LoanProduct extends Product {
 		}
 	}
 
-	// Method for adding the re-payment details
-	public void repayAmount(int loanId, Double amount, Date date) {
-		try {
-			ScheduleSQL.insertRepaymentSchedule(loanId, amount, Util.toSQLDate(date));
-		} catch (Exception e) {
-			System.out.println("Loan id does not exist");
-		}
-	}
 	@Override
-	public void getCashflow(int productId,Date date){
-		LoanProduct lp= (LoanProduct)LoanProductSQL.readProduct(productId);
-		LoanCashflow.generateCashflows(lp.getLoanId(),date,lp.getRate());
-		
+	public void getCashflow(int productId){
+		Product lp= (LoanProduct)LoanProductSQL.readProduct(productId);
+		Cashflow cs=new LoanCashflow();
+		ArrayList<Cashflow> cashflows=cs.generateCashflows(lp);
+		lp.setCashflows(cashflows);
+		for(int i=0;i<cashflows.size();i++){
+			LoanCashflow cashflow=(LoanCashflow)cashflows.get(i);
+			System.out.println(cashflow);
+		}
 		
 	}
 
@@ -168,9 +175,17 @@ public class LoanProduct extends Product {
 	public String toString() {
 		return "LoanProduct{" +
 
-				"loanId=" + getLoanId() + ", rate=" + rate + ",Start Date=" + Util.formatDate(getStartDate())
+				"productId="+ this.getProductId() + ", loanId=" + getLoanId() + ", rate=" + rate + ",Start Date=" + Util.formatDate(getStartDate())
 				+ ",End Date=" + Util.formatDate(getEndDate()) + ", totalValue=" + totalValue
-				+ ", disbursementSchedule= " + disbursementSchedule + '}';
+				+ ", disbursementSchedule= " + disbursementSchedule + " ,"+"Payment Option: " + paymentOption + '}';
+	}
+
+	public String getPaymentOption() {
+		return paymentOption;
+	}
+
+	public void setPaymentOption(String paymentOption) {
+		this.paymentOption = paymentOption;
 	}
 
 }

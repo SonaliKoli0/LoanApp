@@ -1,15 +1,27 @@
 package product;
 
+import java.util.ArrayList;
 import java.util.Date;
+
+import utils.Util;
 
 public class Cashflow {
 	
-	private Date date;
-	private int productId;
-	private String type;
-	private String direction;
+	protected Date date;
+	protected int productId;
+	protected String type;
+	protected String direction;
 	
-	public Date date() {
+	public Cashflow(int id, Date date, String type, String direction) {
+		this.productId=id;
+		this.date=date;
+		this.type=type;
+		this.direction=direction;
+	}
+	public Cashflow(){
+		
+	}
+	public Date getDate() {
 		return date;
 	}
 	public void setDate(Date date) {
@@ -33,7 +45,13 @@ public class Cashflow {
 	public void setDirection(String direction) {
 		this.direction = direction;
 	}
-
+    
+	public String toString(){
+		return productId+"\t"+Util.formatDate(this.getDate())+"\t"+this.getDirection()+"\t"+getType()+"\t";
+	}
+	public ArrayList<Cashflow> generateCashflows(Product lp) {
+		return null;
+	}
 	
 
 }
