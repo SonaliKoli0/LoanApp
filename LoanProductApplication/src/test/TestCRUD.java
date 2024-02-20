@@ -105,7 +105,7 @@ public class TestCRUD {
 	@Test
 	public void testReadProduct() throws SQLException {
 		// Read the test product from the database
-		Product product = ProductSQL.readProduct(300); 
+		Product product = ProductSQL.readProduct(203); 
 
 		// Verify that the product is not null
 		assertNotNull(product);

@@ -1,20 +1,24 @@
 package utils;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
+	public static final String DDMMYYYY="dd/MM/yyyy";
+	public static final String YYYYMMDD="yyyy-MM-dd";
 
 	// Method to parse date from string
 	public static Date parseDate(String dateString) {
 		try {
-			return new SimpleDateFormat("dd/MM/yyyy").parse(dateString);
+			return new SimpleDateFormat(DDMMYYYY).parse(dateString);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			return null;
@@ -24,7 +28,7 @@ public class Util {
 	//Method to format date 
 	public static String formatDate(Date date) {
 		try {
-			return new SimpleDateFormat("dd/MM/yyyy").format(date);
+			return new SimpleDateFormat(DDMMYYYY).format(date);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -74,14 +78,16 @@ public class Util {
 		}
 		
 			try {
-				return new SimpleDateFormat("yyyy-MM-dd").parse(currentMonth+"");
+				return new SimpleDateFormat(YYYYMMDD).parse(currentMonth+"");
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		return null;
 	}
-	 
+	/**
+	 *Returns true if given dates are in same month
+	 */
     public static boolean isSameMonth(Date date1, Date date2) {
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
@@ -89,17 +95,31 @@ public class Util {
         cal2.setTime(date2);
         return cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
     }
- 
+    /**
+	 *Returns the number of days in given Month
+	 */
     public static int getNumberOfDaysInMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
- 
+    /**
+	 *Returns the date after one month from given Date
+	 */
     public static Date addMonths(Date date, int months) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, months);
         return calendar.getTime();
     }
+    public static long noOfMonthsBtwGivenDates(Date date1,Date date2){
+    DateFormat formatter = new SimpleDateFormat(YYYYMMDD);
+	String startDate = formatter.format(date1);
+	String endDate = formatter.format(date2);
+	long monthsBetween = ChronoUnit.MONTHS.between(YearMonth.from(LocalDate.parse(startDate)),
+			YearMonth.from(LocalDate.parse(endDate)));
+	return monthsBetween;
+    }
+
+    
 }

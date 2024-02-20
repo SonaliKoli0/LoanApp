@@ -1,9 +1,11 @@
 package product;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import databaseConnector.LoanProductSQL;
+import utils.Constants;
 import utils.Util;
 
 import java.util.ArrayList;
@@ -168,6 +170,29 @@ public class LoanProduct extends Product {
 			System.out.println(cashflow);
 		}
 		
+	}
+	public  Product buildProduct(HashMap<String, String> inputs) throws Exception {
+		String productType = inputs.get(Constants.PRODUCTTYPE);
+		Date startDate = Util.parseDate(inputs.get(Constants.STARTDATE));
+		Date endDate = Util.parseDate(inputs.get(Constants.ENDDATE));
+		double rate = Double.parseDouble(inputs.get(Constants.RATE));
+		double totalValue = Double.parseDouble(inputs.get(Constants.TOTALVALUE));
+		String schedule = inputs.get(Constants.SCHEDULE);
+		String paymentOption = inputs.get(Constants.PAYMENTOPTION);
+		String[] scheduleArray = schedule.split("\\_");
+		List<Schedule> disbursementSchedule = new ArrayList<Schedule>();
+		for (String s : scheduleArray) {
+			Schedule sch = new Schedule();
+			String[] oneSchedule = s.split("=");
+			sch.setDate(Util.parseDate(oneSchedule[0]));
+			sch.setAmount(Double.parseDouble(oneSchedule[1]));
+			disbursementSchedule.add(sch);
+		}
+		Product.inputValidation(startDate, endDate, totalValue, rate, disbursementSchedule);
+
+		LoanProduct loanProduct = new LoanProduct(-1, -1, startDate, endDate, productType, totalValue, rate,
+				disbursementSchedule, null, paymentOption);
+		return loanProduct;
 	}
 
 	// Method for printing the loan product details

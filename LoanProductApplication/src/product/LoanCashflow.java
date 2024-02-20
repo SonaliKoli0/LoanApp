@@ -1,214 +1,199 @@
 package product;
- 
-import java.text.DateFormat;
+
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.temporal.ChronoUnit;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import databaseConnector.ScheduleSQL;
+import utils.Constants;
 import utils.Util;
- 
+
 public class LoanCashflow extends Cashflow {
+	public static String TOTALPRINCIPALPAID = "Total Principal Paid:";
+	public static String TOTALINTERESTPAID = "Total Interest Paid:";
+	public static String FLOW = "FLOW";
+	public static String PID = "PID";
+	public static String TYPE = "TYPE";
 	protected double principal;
-	protected double interestValue;
- 
-	protected static double remainingPrincipal = 0, remainingPrincipal1, totalInterestPaid = 0, totalPrincipalPaid = 0,
-			paymentAmount, monthlyInterestRate;
+	protected double totalInterestValue;
+
+	protected static double remainingPrincipal = 0, totalDisbursedAmountInCurrMonth, totalInterestPaid = 0,
+			totalPrincipalPaid = 0, paymentAmount, monthlyInterestRate;
 	static int disbursementIndex = 0;
 	static Date cashflowDate, lastRepayment = null;
 	static List<Schedule> ds = null;
 	static ArrayList<Cashflow> ls = null;
 	int productId = 0;
-	boolean firstDisbursement = false;
- 
+
 	public LoanCashflow(int id, Date date, String type, String direction, Double amount) {
 		super(id, date, type, direction);
 		this.principal = amount;
- 
+
 	}
- 
+
 	public LoanCashflow() {
- 
+
 	}
- 
+
 	public void setPrincipal(double principal) {
- 
+
 	}
- 
+
 	public void setInterestValue(double interesValue) {
- 
+
 	}
- 
+
 	public double getPrincipal() {
- 
+
 		return principal;
- 
+
 	}
- 
+
 	public double getInterestValue() {
- 
-		return interestValue;
+
+		return totalInterestValue;
 	}
- 
-	public double getLastPayOutDay(int loanId) {
-		return 12.44;
-	}
- 
-	public double getCurrentPrincipal(double currDisbursedAmount, double currRepayedAmount) {
-		return 12.44;
-	}
- 
-	public double getInterestValue(double interestRate, double amount) {
-		return 12.44;
-	}
- 
-	public double getMonthlyInterestRate(double rate) {
-		return 12.44;
-	}
- 
- 
+
+	
+
 	@Override
-	public ArrayList<Cashflow> generateCashflows(Product p) {
- 
-		LoanProduct lp = (LoanProduct) p;
-        String option=lp.getPaymentOption();
+	public ArrayList<Cashflow> generateCashflows(Product product) {
+
+		LoanProduct lp = (LoanProduct) product;
+		String option = lp.getPaymentOption();
 		ds = ScheduleSQL.readDisbursementSchedule(lp.getLoanId());
 		ls = new ArrayList<Cashflow>();
-		productId = p.getProductId();
-		//System.out.println(ds.get(0).getDate()+"  "+(p.getStartDate()+""));
-		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		String mydate = formatter.format(ds.get(0).getDate());
-		long monthsBetween = ChronoUnit.MONTHS.between(YearMonth.from(LocalDate.parse(mydate)),
-				YearMonth.from(LocalDate.parse(p.getEndDate() + "")));
- 
+		productId = product.getProductId();
+
+		Date cashflowStartDate = ds.get(0).getDate();
+		long monthsBetween = Util.noOfMonthsBtwGivenDates(cashflowStartDate, product.getEndDate());
+
 		monthlyInterestRate = lp.getRate() / 12.0; // Convert to monthly
- 
+
 		lastRepayment = ds.get(0).getDate();
 		DecimalFormat df = new DecimalFormat("#,##0.00");
 
- 
 		// Iterate through each month
 		for (int month = 0; month < monthsBetween; month++) {
 			cashflowDate = Util.addMonths(ds.get(0).getDate(), month);
-			remainingPrincipal1 = 0;
-			interestValue = 0;
- 
-			handleDisbursement(p, ls);
-			if (option instanceof String && option.equals("AT_MATURITY")) {
+			totalDisbursedAmountInCurrMonth = 0;
+			totalInterestValue = 0;
+
+			handleDisbursement(product, ls);
+			if (option instanceof String && option.equals(Constants.ATMATURITY)) {
 				handleRepaymentsAtMaturity(month, monthsBetween);
 			} else {
 				handleRepayments(month, monthsBetween);
 				checkRemainingPrincipal(month, monthsBetween);
 			}
- 
+
 		}
- 
+
 		// Output summary
-		System.out.println("\nTotal Interest Paid: " + df.format(totalInterestPaid));
-		System.out.println("Total Principal Paid: " + df.format(totalPrincipalPaid) + "\n");
-		System.out.println("PID" + "\t" + "FLOW" + "\t" + "DATE" + "\t\t" + "TYPE" + "\t\t" + "AMOUNT");
-		disbursementIndex=0;
-		remainingPrincipal=0;
+		System.out.println("\n" + LoanCashflow.TOTALINTERESTPAID + df.format(totalInterestPaid));
+		System.out.println(LoanCashflow.TOTALPRINCIPALPAID + df.format(totalPrincipalPaid) + "\n");
+		System.out.println(LoanCashflow.PID + "\t" + LoanCashflow.FLOW + "\t" + Constants.DATE + "\t\t"
+				+ LoanCashflow.TYPE + "\t\t" + Constants.AMOUNT);
+		disbursementIndex = 0;
+		remainingPrincipal = 0;
 		return ls;
 	}
- 
+
 	private void handleRepaymentsAtMaturity(int month, long monthsBetween) {
-		double dailyInterestRate = monthlyInterestRate
-				/ Util.getNumberOfDaysInMonth(cashflowDate);
-		double monthlyInterest = (remainingPrincipal) * dailyInterestRate*Util.getNumberOfDaysInMonth(cashflowDate) / 100;
-		remainingPrincipal += remainingPrincipal1;
-		totalInterestPaid += (monthlyInterest + interestValue);
+		double dailyInterestRate = monthlyInterestRate / Util.getNumberOfDaysInMonth(cashflowDate);
+		double monthlyInterest = (remainingPrincipal) * dailyInterestRate * Util.getNumberOfDaysInMonth(cashflowDate)
+				/ 100;
+		remainingPrincipal += totalDisbursedAmountInCurrMonth;
+		totalInterestPaid += (monthlyInterest + totalInterestValue);
 		totalPrincipalPaid = remainingPrincipal;
- 
-		lastRepayment = Util.addMonths(cashflowDate,1);
-		ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate,1), "INTEREST", "IN", monthlyInterest + interestValue));
-		if (monthsBetween-1 == month) {
-			ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate,1), "PRINCIPAL", "IN", totalPrincipalPaid));
+
+		lastRepayment = Util.addMonths(cashflowDate, 1);
+		ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate, 1), "INTEREST", "IN",
+				monthlyInterest + totalInterestValue));
+		if (monthsBetween - 1 == month) {
+			ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate, 1), "PRINCIPAL", "IN", totalPrincipalPaid));
 		}
 	}
- 
+
 	// Handle disbursements within the current month
 	public void handleDisbursement(Product p, List<Cashflow> ls) {
-		interestValue = 0;
-		remainingPrincipal1 = 0;
+		totalInterestValue = 0;
+		totalDisbursedAmountInCurrMonth = 0;
 		while (disbursementIndex < ds.size()
-&& ds.get(disbursementIndex).getDate().before(Util.addMonths(cashflowDate, 1))) {
-			double remainingPrincipal2 = ds.get(disbursementIndex).getAmount();
+				&& ds.get(disbursementIndex).getDate().before(Util.addMonths(cashflowDate, 1))) {
+			double currentDisbursementAmount = ds.get(disbursementIndex).getAmount();
 			double dailyInterestRate = monthlyInterestRate
 					/ Util.getNumberOfDaysInMonth(ds.get(disbursementIndex).getDate());
-			double interest = remainingPrincipal2 * (dailyInterestRate) * Math
+			double interest = currentDisbursementAmount * (dailyInterestRate) * Math
 					.abs(Util.getDifferenceDays(ds.get(disbursementIndex).getDate(), Util.addMonths(lastRepayment, 1)))
 					/ 100;
-			LoanCashflow lc2 = new LoanCashflow(p.getProductId(), ds.get(disbursementIndex).getDate(), "PRINCIPAL",
-					"OUT", ds.get(disbursementIndex).getAmount());
+			LoanCashflow lc2 = new LoanCashflow(p.getProductId(), ds.get(disbursementIndex).getDate(),
+					Constants.PRINCIPAL, Constants.OUT, ds.get(disbursementIndex).getAmount());
 			ls.add(lc2);
-			remainingPrincipal1 += remainingPrincipal2;
-			interestValue += interest;
+			totalDisbursedAmountInCurrMonth += currentDisbursementAmount;
+			totalInterestValue += interest;
 			disbursementIndex++;
 		}
 	}
- 
+
 	// Handle repayments within the current month
 	public void handleRepayments(int month, long monthsBetween) {
-		if(month!=monthsBetween){
-		if (remainingPrincipal >= 0) {
-			if (remainingPrincipal == 0) {
-				remainingPrincipal = remainingPrincipal1;
-				interestValue = 0;
-				remainingPrincipal1 = 0;
+		if (month != monthsBetween) {
+			if (remainingPrincipal >= 0) {
+				if (remainingPrincipal == 0) {
+					remainingPrincipal = totalDisbursedAmountInCurrMonth;
+					totalInterestValue = 0;
+					totalDisbursedAmountInCurrMonth = 0;
+				}
+
+				double monthlyInterest = (remainingPrincipal) * monthlyInterestRate / 100;
+				remainingPrincipal += totalDisbursedAmountInCurrMonth;
+
+				paymentAmount = ((remainingPrincipal) / (monthsBetween - month)) + monthlyInterest + totalInterestValue;
+				remainingPrincipal -= paymentAmount - (monthlyInterest + totalInterestValue);
+				totalInterestPaid += (monthlyInterest + totalInterestValue);
+				totalPrincipalPaid += paymentAmount - (monthlyInterest + totalInterestValue);
+				lastRepayment = Util.addMonths(cashflowDate, 1);
+				ls.add(new LoanCashflow(productId, lastRepayment, Constants.INTEREST, Constants.IN,
+						monthlyInterest + totalInterestValue));
+				ls.add(new LoanCashflow(productId, lastRepayment, Constants.PRINCIPAL, Constants.IN,
+						paymentAmount - (monthlyInterest + totalInterestValue)));
 			}
- 
-			double monthlyInterest = (remainingPrincipal) * monthlyInterestRate / 100;
-			remainingPrincipal += remainingPrincipal1;
- 
-			paymentAmount = ((remainingPrincipal) / (monthsBetween - month )) + monthlyInterest + interestValue;
-			remainingPrincipal -= paymentAmount - (monthlyInterest + interestValue);
-			totalInterestPaid += (monthlyInterest + interestValue);
-			totalPrincipalPaid += paymentAmount - (monthlyInterest + interestValue);
-			lastRepayment =Util.addMonths(cashflowDate,1);
-			ls.add(new LoanCashflow(productId,lastRepayment, "INTEREST", "IN", monthlyInterest + interestValue));
-			ls.add(new LoanCashflow(productId,lastRepayment, "PRINCIPAL", "IN",
-					paymentAmount - (monthlyInterest + interestValue)));
-		}}
+		}
 	}
- 
+
 	public void checkRemainingPrincipal(int month, long monthsBetween) {
 		if (month == monthsBetween && remainingPrincipal > 0.01) {
 			double dailyInterestRate = monthlyInterestRate / Util.getNumberOfDaysInMonth(cashflowDate);
-			double interest = remainingPrincipal1 * (dailyInterestRate)
+			double interest = totalDisbursedAmountInCurrMonth * (dailyInterestRate)
 					* Util.getDifferenceDays(lastRepayment, cashflowDate);
 			paymentAmount = remainingPrincipal;
 			remainingPrincipal = 0.0;
-			LoanCashflow lc1 = new LoanCashflow(productId, cashflowDate, "INTEREST", "IN", interest);
+			LoanCashflow lc1 = new LoanCashflow(productId, cashflowDate, Constants.INTEREST, Constants.IN, interest);
 			ls.add(lc1);
-			LoanCashflow lc2 = new LoanCashflow(productId, cashflowDate, "PRINCIPAL", "IN", paymentAmount);
+			LoanCashflow lc2 = new LoanCashflow(productId, cashflowDate, Constants.PRINCIPAL, Constants.IN,
+					paymentAmount);
 			ls.add(lc2);
 		}
 	}
-	
-	 @Override
-	    public boolean equals(Object obj) {
-	        if (this == obj)
-	            return true;
-	        if (obj == null || getClass() != obj.getClass())
-	            return false;
-	        LoanCashflow other = (LoanCashflow) obj;
-	        return productId == other.productId && 
-	               Objects.equals(date, other.date) && 
-	               Objects.equals(type, other.type) && 
-	               Objects.equals(direction, other.direction) && 
-	               Double.compare(principal, other.principal) == 0;
-	    }
-	 
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+		LoanCashflow other = (LoanCashflow) obj;
+		return productId == other.productId && Objects.equals(date, other.date) && Objects.equals(type, other.type)
+				&& Objects.equals(direction, other.direction) && Double.compare(principal, other.principal) == 0;
+	}
+
 	public String toString() {
 		return this.getProductId() + "\t" + this.getDirection() + "\t" + Util.formatDate(this.getDate()) + "\t"
 				+ this.getType() + "\t" + this.getPrincipal();
 	}
- 
+
 }

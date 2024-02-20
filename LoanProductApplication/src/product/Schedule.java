@@ -2,6 +2,7 @@ package product;
 
 import java.util.Date;
 
+import utils.Constants;
 import utils.Util;
 
 public class Schedule {
@@ -46,7 +47,7 @@ public class Schedule {
 	}
 
 	public String toString() {
-		return "Id=" + getId() + ", Date=" + Util.formatDate(getDate()) + ", Amount=" + getAmount();
+		return Constants.ID+"=" + getId() + ","+ Constants.DATE+"=" + Util.formatDate(getDate()) + ","+ Constants.AMOUNT+"=" + getAmount();
 	}
 
 }
