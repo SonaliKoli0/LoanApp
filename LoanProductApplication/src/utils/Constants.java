@@ -25,7 +25,7 @@ public class Constants {
 	public static final String INTEREST = "INTEREST";
 	public static final String IN = "IN";
 	public static final String OUT = "OUT";
-
+	public static final String DETAILSERROR = "Enter Details correctly";
 	
 	
 	

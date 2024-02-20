@@ -168,6 +168,7 @@ public class Product {
 
 	// checks which action wants to perform and calls that action
 	public static Product checkAction(HashMap<String, String> inputs) throws Exception {
+		try{
 		String productType = inputs.get(Constants.PRODUCTTYPE);
 		String action = inputs.get(Constants.ACTION);
 				
@@ -183,7 +184,11 @@ public class Product {
 			loanProduct.setProductId(Integer.parseInt(inputs.get(Constants.PRODUCTID)));
 			loanProduct.callAction(action, loanProduct);
 			return loanProduct;
-		}}
+		}}}
+		catch(Exception e){
+			System.err.print(Constants.DETAILSERROR);
+			System.exit(0);
+		}
 
 		return null;
 	}

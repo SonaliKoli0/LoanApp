@@ -20,7 +20,8 @@ public class Util {
 		try {
 			return new SimpleDateFormat(DDMMYYYY).parse(dateString);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			System.err.print(Constants.DETAILSERROR);
+			System.exit(0);
 			return null;
 		}
 	}
@@ -30,7 +31,8 @@ public class Util {
 		try {
 			return new SimpleDateFormat(DDMMYYYY).format(date);
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.print(Constants.DETAILSERROR);
+			System.exit(0);
 			return null;
 		}
 	}
@@ -81,7 +83,8 @@ public class Util {
 				return new SimpleDateFormat(YYYYMMDD).parse(currentMonth+"");
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.print(Constants.DETAILSERROR);
+				System.exit(0);
 			}
 		return null;
 	}
