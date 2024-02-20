@@ -19,6 +19,10 @@ public class LoanProductSQL extends ProductSQL {
 
 	protected static final String SAVE_LOAN_PRODUCT = "INSERT INTO  LOANPRODUCT (productId,loanvalue,interestrate,payment_type) VALUES (?,?,?,?)";
 	protected static final String READ_LOAN_PRODUCT = "SELECT * FROM LOANPRODUCT INNER JOIN PRODUCT ON LOANPRODUCT.PRODUCTID=PRODUCT.PRODUCT_ID WHERE LOANPRODUCT.PRODUCTID=? ";
+	protected static final String DELETE_LOAN_PRODUCT = "DELETE FROM LOANPRODUCT WHERE PRODUCTID=?";
+	protected static final String GET_LOAN_PRODUCT = "SELECT * FROM LOANPRODUCT WHERE PRODUCTID=?";
+	protected static final String GET_LOAN_ID = "SELECT loanId FROM LoanProduct WHERE rownum = 1 ORDER BY loanId DESC";
+	
 
 	/**
 	 *  Method for inserting Loan product details in to the database
@@ -51,7 +55,7 @@ public class LoanProductSQL extends ProductSQL {
 				throw new SQLException("Inserting product failed, no rows affected.");
 			}
 			try (ResultSet generatedKeys = stmt
-					.executeQuery("SELECT loanId FROM LoanProduct WHERE rownum = 1 ORDER BY loanId DESC")) {
+					.executeQuery(GET_LOAN_ID)) {
 				if (generatedKeys.next()) {
 					id = generatedKeys.getLong("loanId");
 
@@ -123,7 +127,7 @@ public class LoanProductSQL extends ProductSQL {
 		Product lp = ProductSQL.readProduct(id);
 		try {
 			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement("SELECT * FROM LOANPRODUCT WHERE PRODUCTID=?");
+			stmt = con.prepareStatement(GET_CURRENT_PRODUCT_ID);
 			stmt.setLong(1, id);
 
 			rs = stmt.executeQuery();
@@ -165,14 +169,14 @@ public class LoanProductSQL extends ProductSQL {
 			LoanProduct lp = (LoanProduct) LoanProductSQL.readProduct(id);
 			ScheduleSQL.deleteDisbursementSchedule(lp.getLoanId());
 			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement("DELETE FROM LOANPRODUCT WHERE PRODUCTID=?");
+			stmt = con.prepareStatement(DELETE_LOAN_PRODUCT);
 			stmt.setInt(1, id);
 			stmt.executeUpdate();
 			ProductSQL.deleteProduct(id);
 			System.out.println("Product deleted successfully");
 
 		} catch (Exception e) {
-			System.out.println("No schedule found for product id " + id);
+			//System.out.println("No schedule found for product id " + id);
 		} finally {
 			DbUtils.close(stmt, con);
 		}

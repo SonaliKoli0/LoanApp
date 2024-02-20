@@ -19,25 +19,26 @@ import utils.Util;
 public class ScheduleSQL {
 
 	protected static final String SAVE_DisbursementSchedule = "INSERT INTO  DisbursementSchedule (LoanID,DisbursementDate,DisbursementAmount) VALUES (?,?, ?)";
-	protected static final String SAVE_RepaymentSchedule = "INSERT INTO  RepaymentSchedule (LID,RepaymentDate,RepaymentAmount) VALUES (?,?, ?)";
-
+	protected static final String DELETE_DisbursementSchedule = "DELETE FROM disbursementSchedule WHERE LOANID=?";
+	protected static final String GET_DisbursementSchedule_BY_LOAN_ID = "SELECT * FROM disbursementschedule WHERE disbursementSchedule.LoanID=?";
+	
 	/**
 	 * Method for adding the disbursement schedule in the DB
-	 * @param p
+	 * @param product
 	 * @throws Exception
 	 */
-	public static void insertDisbursementSchedule(Product p) throws Exception {
+	public static void insertDisbursementSchedule(Product product) throws Exception {
 		PreparedStatement stmt = null;
 		
 		int affectedRows = 0;
-		LoanProduct lp = (LoanProduct) p;
+		LoanProduct lp = (LoanProduct) product;
 		Connection con = null;
 
 		try {
 			con = DatabaseHelper.getConnection();
 
-			if (p.getStartDate() != null) {
-				for (Schedule schedule : p.getDisbursementSchedule()) {
+			if (product.getStartDate() != null) {
+				for (Schedule schedule : product.getDisbursementSchedule()) {
 					int index = 1;
 					stmt = con.prepareStatement(SAVE_DisbursementSchedule, Statement.RETURN_GENERATED_KEYS);
 					stmt.setInt(index++, lp.getLoanId());
@@ -72,7 +73,7 @@ public class ScheduleSQL {
 		List<Schedule> ls = new ArrayList<Schedule>();
 		try {
 			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement("SELECT * FROM disbursementschedule WHERE disbursementSchedule.LoanID=?");
+			stmt = con.prepareStatement(GET_DisbursementSchedule_BY_LOAN_ID);
 			stmt.setInt(1, loanId);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
@@ -113,14 +114,14 @@ public class ScheduleSQL {
 
 		try {
 			con = DatabaseHelper.getConnection();
-			stmt = DbUtils.newPreparedStatement(con, "DELETE FROM disbursementSchedule WHERE LOANID=?");
+			stmt = DbUtils.newPreparedStatement(con, DELETE_DisbursementSchedule);
 			stmt.setLong(1, id);
 
 			stmt.executeUpdate();
 			System.out.println("Disbursement deleted successfully");
 
 		} catch (Exception e) {
-			System.out.println("No disbursement schedule found for loan id " + id);
+			System.err.println("No disbursement schedule found for loan id " + id);
 		} finally {
 
 			DbUtils.close(stmt, con);
