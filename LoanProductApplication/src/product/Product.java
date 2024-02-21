@@ -10,11 +10,9 @@ import utils.Constants;
 import utils.Util;
 
 public class Product {
-
-	
-	public final static String STARTDATEERROR = "start Date cannot be greater than or equal to endDate!!";
-	public final static String TOTALVALUESUMERROR = "Total of disbursed amount should be equals to TotalLoanValue!!";
-    public final static String DISBURSEMENTDATERROR="Last disbursement Date should be at least one month before end date !!";
+	public final static String START_DATE_ERROR = "start Date cannot be greater than or equal to endDate!!";
+	public final static String TOTAL_VALUE_SUM_ERROR = "Total of disbursed amount should be equals to TotalLoanValue!!";
+	public final static String DISBURSEMENT_DATE_ERROR = "Last disbursement Date should be at least one month before end date !!";
 	private int productId;
 	private Date startDate;
 	private Date endDate;
@@ -103,38 +101,41 @@ public class Product {
 	 * method calls the corresponding action that user wants to perform.
 	 * 
 	 * @param Action
-	 * @param p
+	 * @param product
 	 */
 	public void callAction(String Action, Product product) {
 		switch (Action) {
-		case Constants.READ: {
-			Product loanProduct = (LoanProduct) product;
-			loanProduct = loanProduct.readProduct(loanProduct.getProductId());
-			System.out.println(loanProduct);
-		}
-			break;
-		case Constants.REMOVE: {
-			Product loanProduct = (LoanProduct) product;
-			loanProduct.deleteProduct(loanProduct.getProductId());
-		}
-			break;
-		case Constants.CASHFLOW: {
-			LoanProduct loanProduct = (LoanProduct) product;
-			// Date date = Util.parseDate(AppStarter.inputs.get("Date"));
-			loanProduct.getCashflow(loanProduct.getProductId());
-		}
-			break;
-		case Constants.AMEND: {
-			LoanProduct loanProduct = (LoanProduct) product;
-			int id = product.getProductId();
-			loanProduct = (LoanProduct) loanProduct.readProduct(id);
-			loanProduct.updateProduct(id);
-			loanProduct.setProductId(id);
-			callAction(Constants.READ, loanProduct);
-		}
-			break;
-		default:
-			break;
+			case Constants.READ: {
+		
+				product = product.readProduct(product.getProductId());
+				ArrayList<Cashflow> list =product.getListOfCashflows(product);
+				product.setCashflows(list);
+				System.out.println(product);
+			}
+				break;
+			case Constants.REMOVE: {
+				
+				product.deleteProduct(product.getProductId());
+				
+			}
+				break;
+			case Constants.CASHFLOW: {
+				
+			
+				product.getCashflow(product.getProductId());
+			}
+				break;
+			case Constants.AMEND: {
+				
+				int id = product.getProductId();
+				product =  product.readProduct(id);
+				product.updateProduct(id);
+				product.setProductId(id);
+				callAction(Constants.READ, product);
+			}
+				break;
+			default:
+				break;
 		}
 
 	}
@@ -162,16 +163,16 @@ public class Product {
 
 	}
 
-	public  Product buildProduct(HashMap<String, String> inputs) throws Exception {
+	public Product buildProduct(HashMap<String, String> inputs) throws Exception {
 		return null;
 	}
 
 	// checks which action wants to perform and calls that action
 	public static Product checkAction(HashMap<String, String> inputs) throws Exception {
-		try{
-		String productType = inputs.get(Constants.PRODUCTTYPE);
-		String action = inputs.get(Constants.ACTION);
-				
+		try {
+			String productType = inputs.get(Constants.PRODUCTTYPE);
+			String action = inputs.get(Constants.ACTION);
+
 			if (productType.equals(Constants.LOAN)) {
 				LoanProduct loanProduct = new LoanProduct();
 				if (action.equals(Constants.NEW)) {
@@ -179,36 +180,38 @@ public class Product {
 					loanProduct.createProduct();
 					System.out.println(loanProduct);
 					return loanProduct;
-			
-		} else {
-			loanProduct.setProductId(Integer.parseInt(inputs.get(Constants.PRODUCTID)));
-			loanProduct.callAction(action, loanProduct);
-			return loanProduct;
-		}}}
-		catch(Exception e){
-			System.err.print(Constants.DETAILSERROR);
+
+				} else {
+					loanProduct.setProductId(Integer.parseInt(inputs.get(Constants.PRODUCTID)));
+					loanProduct.callAction(action, loanProduct);
+					return loanProduct;
+				}
+			}
+		} catch (Exception e) {
+			System.err.print(Constants.DETAILS_ERROR);
 			System.exit(0);
 		}
 
 		return null;
 	}
+
 	public static void inputValidation(Date startDate, Date endDate, double totalValue, double rate,
 			List<Schedule> disbursementSchedule) {
 		if (startDate.compareTo(endDate) != -1) {
-			System.err.print(Product.STARTDATEERROR);
+			System.err.print(Product.START_DATE_ERROR);
 			System.exit(0);
 		}
 		if (Util.addMonths(disbursementSchedule.get(disbursementSchedule.size() - 1).getDate(), 1).after(endDate)) {
-			System.err.print(Product.DISBURSEMENTDATERROR);
+			System.err.print(Product.DISBURSEMENT_DATE_ERROR);
 			System.exit(0);
 		}
 		double checkTotalValue = 0;
 		for (int i = 0; i < disbursementSchedule.size(); i++) {
 			checkTotalValue += disbursementSchedule.get(i).getAmount();
 		}
-      
+
 		if (totalValue != checkTotalValue) {
-			System.err.print(Product.TOTALVALUESUMERROR);
+			System.err.print(Product.TOTAL_VALUE_SUM_ERROR);
 			System.exit(0);
 		}
 	}
@@ -216,13 +219,42 @@ public class Product {
 	// for printing product details
 	@Override
 	public String toString() {
-		return Constants.PRODUCT+"{" + "productId=" + productId + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", cashflows=" + cashflows + '}';
+		StringBuilder product= new StringBuilder();
+		product.append(Constants.PRODUCTID);
+		product.append("\t\t");
+		product.append(this.getProductId());
+		product.append("\n");
+		product.append(Constants.STARTDATE);
+		product.append("\t\t");
+		product.append(Util.formatDate(getStartDate()));
+		product.append("\n");
+		product.append(Constants.ENDDATE);
+		product.append("\t\t");
+		product.append(Util.formatDate(getEndDate()));
+		product.append("\n");
+		
+		product.append(Constants.SCHEDULE);
+		product.append("\t\t");
+	
+		product.append(Constants.CASHFLOW);
+		product.append("\t\t");
+		product.append(this.getCashflows());
+		product.append("\n");
+		return product+"";
+		
+//		return Constants.PRODUCT + "{" + Constants.PRODUCTID + "=" + productId + "," + Constants.STARTDATE + "="
+//				+ startDate + "," + Constants.ENDDATE + "=" + endDate
+//				+ "," + Constants.CASHFLOW + "=" + cashflows + '}';
 	}
 
 	public void createLoanProduct() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public ArrayList<Cashflow> getListOfCashflows(Product p) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -47,7 +47,21 @@ public class Schedule {
 	}
 
 	public String toString() {
-		return Constants.ID+"=" + getId() + ","+ Constants.DATE+"=" + Util.formatDate(getDate()) + ","+ Constants.AMOUNT+"=" + getAmount();
+		StringBuilder schedule= new StringBuilder();
+		schedule.append("\n");
+		schedule.append(Constants.ID);
+		schedule.append("\t");
+		schedule.append(getId());
+		schedule.append("\t");
+		schedule.append(Constants.DATE);
+		schedule.append("\t");
+		schedule.append(Util.formatDate(getDate()));
+		schedule.append(Constants.AMOUNT);
+		schedule.append("\t");
+		schedule.append(getAmount());
+		
+		return schedule+"";
+		//return Constants.ID+"=" + getId() + ","+ Constants.DATE+"=" + Util.formatDate(getDate()) + ","+ Constants.AMOUNT+"=" + getAmount();
 	}
 
 }

@@ -1,6 +1,6 @@
 package product;
 
-import java.text.DecimalFormat;
+//import java.text.DecimalFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,7 +74,7 @@ public class LoanCashflow extends Cashflow {
 		monthlyInterestRate = lp.getRate() / 12.0; // Convert to monthly
 
 		lastRepayment = ds.get(0).getDate();
-		DecimalFormat df = new DecimalFormat("#,##0.00");
+		//DecimalFormat df = new DecimalFormat("#,##0.00");
 
 		// Iterate through each month
 		for (int month = 0; month < monthsBetween; month++) {
@@ -93,10 +93,9 @@ public class LoanCashflow extends Cashflow {
 		}
 
 		// Output summary
-		System.out.println("\n" + LoanCashflow.TOTALINTERESTPAID + df.format(totalInterestPaid));
-		System.out.println(LoanCashflow.TOTALPRINCIPALPAID + df.format(totalPrincipalPaid) + "\n");
-		System.out.println(LoanCashflow.PID + "\t" + LoanCashflow.FLOW + "\t" + Constants.DATE + "\t\t"
-				+ LoanCashflow.TYPE + "\t\t" + Constants.AMOUNT);
+//		System.out.println("\n" + LoanCashflow.TOTALINTERESTPAID + df.format(totalInterestPaid));
+//		System.out.println(LoanCashflow.TOTALPRINCIPALPAID + df.format(totalPrincipalPaid) + "\n");
+		
 		disbursementIndex = 0;
 		remainingPrincipal = 0;
 		return ls;
@@ -111,10 +110,10 @@ public class LoanCashflow extends Cashflow {
 		totalPrincipalPaid = remainingPrincipal;
 
 		lastRepayment = Util.addMonths(cashflowDate, 1);
-		ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate, 1), "INTEREST", "IN",
+		ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate, 1), Constants.INTEREST, Constants.IN,
 				monthlyInterest + totalInterestValue));
 		if (monthsBetween - 1 == month) {
-			ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate, 1), "PRINCIPAL", "IN", totalPrincipalPaid));
+			ls.add(new LoanCashflow(productId, Util.addMonths(cashflowDate, 1), Constants.PRINCIPAL,Constants.IN, totalPrincipalPaid));
 		}
 	}
 
@@ -132,6 +131,7 @@ public class LoanCashflow extends Cashflow {
 					/ 100;
 			LoanCashflow lc2 = new LoanCashflow(p.getProductId(), ds.get(disbursementIndex).getDate(),
 					Constants.PRINCIPAL, Constants.OUT, ds.get(disbursementIndex).getAmount());
+			
 			ls.add(lc2);
 			totalDisbursedAmountInCurrMonth += currentDisbursementAmount;
 			totalInterestValue += interest;
@@ -192,8 +192,19 @@ public class LoanCashflow extends Cashflow {
 	}
 
 	public String toString() {
-		return this.getProductId() + "\t" + this.getDirection() + "\t" + Util.formatDate(this.getDate()) + "\t"
-				+ this.getType() + "\t" + this.getPrincipal();
+		StringBuilder loanCashflow= new StringBuilder();
+		loanCashflow.append(this.getProductId());
+		loanCashflow.append("\t");
+		loanCashflow.append(this.getDirection());
+		loanCashflow.append("\t");
+		loanCashflow.append(Util.formatDate(this.getDate()));
+		loanCashflow.append("\t");
+		loanCashflow.append(getType());
+		loanCashflow.append("\t");
+		loanCashflow.append(this.getPrincipal());
+		return loanCashflow+"";
+//		return this.getProductId() + "\t" + this.getDirection() + "\t" + Util.formatDate(this.getDate()) + "\t"
+//				+ this.getType() + "\t" + this.getPrincipal();
 	}
 
 }

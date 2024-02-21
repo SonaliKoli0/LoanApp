@@ -47,7 +47,17 @@ public class Cashflow {
 	}
     
 	public String toString(){
-		return productId+"\t"+Util.formatDate(this.getDate())+"\t"+this.getDirection()+"\t"+getType()+"\t";
+		StringBuilder cashflow= new StringBuilder();
+		cashflow.append(productId);
+		cashflow.append("\t");
+		cashflow.append(Util.formatDate(this.getDate()));
+		cashflow.append("\t");
+		cashflow.append(this.getDirection());
+		cashflow.append("\t");
+		cashflow.append(getType());
+		
+		return cashflow+"";
+		//return productId+"\t"+Util.formatDate(this.getDate())+"\t"+this.getDirection()+"\t"+getType()+"\t";
 	}
 	public ArrayList<Cashflow> generateCashflows(Product lp) {
 		return null;

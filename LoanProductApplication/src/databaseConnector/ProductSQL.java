@@ -57,7 +57,7 @@ public class ProductSQL {
 			try (ResultSet generatedKeys = stmt
 					.executeQuery(GET_CURRENT_PRODUCT_ID)) {
 				if (generatedKeys.next()) {
-					pId = generatedKeys.getLong("product_id");
+					pId = generatedKeys.getLong(Constants.PRODUCT_ID);
 
 					product.setProductId((int) pId);
 				} else {

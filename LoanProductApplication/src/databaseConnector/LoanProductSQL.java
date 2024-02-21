@@ -13,6 +13,7 @@ import product.AppStarter;
 import product.LoanProduct;
 import product.Product;
 import product.Schedule;
+import utils.Constants;
 import utils.DbUtils;
 
 public class LoanProductSQL extends ProductSQL {
@@ -22,28 +23,34 @@ public class LoanProductSQL extends ProductSQL {
 	protected static final String DELETE_LOAN_PRODUCT = "DELETE FROM LOANPRODUCT WHERE PRODUCTID=?";
 	protected static final String GET_LOAN_PRODUCT = "SELECT * FROM LOANPRODUCT WHERE PRODUCTID=?";
 	protected static final String GET_LOAN_ID = "SELECT loanId FROM LoanProduct WHERE rownum = 1 ORDER BY loanId DESC";
-	
+	protected static final String LOANID = "LOANID";
+	protected static final String LOANVALUE = "LOANVALUE";
+
+	protected static final String INTERESTRATE = "INTERESTRATE";
+
+	protected static final String PAYMENT_TYPE = "PAYMENT_TYPE";
 
 	/**
-	 *  Method for inserting Loan product details in to the database
-	 * @param p
+	 * Method for inserting Loan product details in to the database
+	 * 
+	 * @param product
 	 * @throws Exception
 	 */
-	public static void insertLoanProduct(Product p) throws Exception {
+	public static void insertLoanProduct(Product product) throws Exception {
 		PreparedStatement stmt = null;
 		int j = 1;
 		long id = -1;
-		ProductSQL.insert(p);
-		LoanProduct lp = (LoanProduct) p;
+		ProductSQL.insert(product);
+		LoanProduct loanProduct = (LoanProduct) product;
 		Connection con = null;
 		try {
 			con = DatabaseHelper.getConnection();
 			stmt = con.prepareStatement(SAVE_LOAN_PRODUCT, Statement.RETURN_GENERATED_KEYS);
-			if (p.getStartDate() != null) {
-				stmt.setInt(j++, p.getProductId());
-				stmt.setInt(j++, (int) lp.getTotalValue());
-				stmt.setInt(j++, (int) lp.getRate());
-				stmt.setString(j++, lp.getPaymentOption());
+			if (product.getStartDate() != null) {
+				stmt.setInt(j++, product.getProductId());
+				stmt.setInt(j++, (int) loanProduct.getTotalValue());
+				stmt.setInt(j++, (int) loanProduct.getRate());
+				stmt.setString(j++, loanProduct.getPaymentOption());
 
 			} else {
 				stmt.setNull(j++, Types.DATE);
@@ -57,9 +64,9 @@ public class LoanProductSQL extends ProductSQL {
 			try (ResultSet generatedKeys = stmt
 					.executeQuery(GET_LOAN_ID)) {
 				if (generatedKeys.next()) {
-					id = generatedKeys.getLong("loanId");
+					id = generatedKeys.getLong(LOANID);
 
-					lp.setLoanId((int) id);
+					loanProduct.setLoanId((int) id);
 
 				} else {
 					throw new SQLException("Inserting product failed, no ID obtained.");
@@ -72,25 +79,25 @@ public class LoanProductSQL extends ProductSQL {
 
 			DbUtils.close(stmt, con);
 		}
-		ScheduleSQL.insertDisbursementSchedule(p);
+		ScheduleSQL.insertDisbursementSchedule(product);
 	}
 
 	/**
-	 *  Method for updating the details for loan Product in database
-	 * @param id
+	 * Method for updating the details for loan Product in database
+	 * 
+	 * @param productId
 	 */
 
-	public static void updateProduct(int id) {
+	public static void updateProduct(int productId) {
 		int index = 1;
 		PreparedStatement stmt = null;
-		ProductSQL.updateProduct(id);
+		ProductSQL.updateProduct(productId);
 		Connection con = null;
 		try {
 			String sql = "UPDATE LoanProduct SET";
-			if (AppStarter.inputs.containsKey("totalValue")) {
+			if (AppStarter.inputs.containsKey(Constants.TOTALVALUE)) {
 				sql += "totalValue =?";
-			}
-			else if (AppStarter.inputs.containsKey("rate")) {
+			} else if (AppStarter.inputs.containsKey(Constants.RATE)) {
 				sql += "rate =?";
 			} else {
 				return;
@@ -98,13 +105,13 @@ public class LoanProductSQL extends ProductSQL {
 			sql += " WHERE LOANID = (SELECT LOANID FROM PRODUCT WHERE PRODUCT_ID = ?)";
 			con = DatabaseHelper.getConnection();
 			stmt = con.prepareStatement(sql);
-			if (AppStarter.inputs.containsKey("totalValue")) {
-				stmt.setDouble(index++, Double.parseDouble(AppStarter.inputs.get("totalValue")));
+			if (AppStarter.inputs.containsKey(Constants.TOTALVALUE)) {
+				stmt.setDouble(index++, Double.parseDouble(AppStarter.inputs.get(Constants.TOTALVALUE)));
 			}
-			if (AppStarter.inputs.containsKey("rate")) {
-				stmt.setDouble(index++, Double.parseDouble(AppStarter.inputs.get("rate")));
+			if (AppStarter.inputs.containsKey(Constants.RATE)) {
+				stmt.setDouble(index++, Double.parseDouble(AppStarter.inputs.get(Constants.RATE)));
 			}
-			stmt.setInt(index++, id);
+			stmt.setInt(index++, productId);
 			stmt.executeUpdate();
 			System.out.println("LoanProduct updated successfully");
 		} catch (Exception e) {
@@ -115,31 +122,32 @@ public class LoanProductSQL extends ProductSQL {
 	}
 
 	/**
-	 *  Method for getting the details of loan product from the database
-	 * @param id
+	 * Method for getting the details of loan product from the database
+	 * 
+	 * @param productId
 	 * @return
 	 */
-	public static Product readProduct(int id) {
+	public static Product readProduct(int productId) {
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		Connection con = null;
-		Product lp = ProductSQL.readProduct(id);
+		Product loanProduct = ProductSQL.readProduct(productId);
 		try {
 			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement(GET_CURRENT_PRODUCT_ID);
-			stmt.setLong(1, id);
+			stmt = con.prepareStatement(GET_LOAN_PRODUCT);
+			stmt.setLong(1, productId);
 
 			rs = stmt.executeQuery();
 
 			if (rs.next()) {
 
-				int loanId = rs.getInt("LOANID");
-				Long totalValue = rs.getLong("LOANVALUE");
-				Double rate = rs.getDouble("INTERESTRATE");
-				String option =rs.getString("PAYMENT_TYPE");
+				int loanId = rs.getInt(LOANID);
+				Long totalValue = rs.getLong(LOANVALUE);
+				Double rate = rs.getDouble(INTERESTRATE);
+				String option = rs.getString(PAYMENT_TYPE);
 				List<Schedule> ls = ScheduleSQL.readDisbursementSchedule(loanId);
-				lp = new LoanProduct(lp, loanId, totalValue, rate, ls,option);
+				loanProduct = new LoanProduct(loanProduct, loanId, totalValue, rate, ls, option);
 				System.out.println("Product read successfully");
 
 			}
@@ -155,28 +163,29 @@ public class LoanProductSQL extends ProductSQL {
 			}
 			DbUtils.close(stmt, con);
 		}
-		return lp;
+		return loanProduct;
 	}
 
 	/**
-	 *  Method to delete the product from the database
-	 * @param id
+	 * Method to delete the product from the database
+	 * 
+	 * @param productId
 	 */
-	public static void deleteProduct(int id) {
+	public static void deleteProduct(int productId) {
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
-			LoanProduct lp = (LoanProduct) LoanProductSQL.readProduct(id);
-			ScheduleSQL.deleteDisbursementSchedule(lp.getLoanId());
+			LoanProduct loanProduct = (LoanProduct) LoanProductSQL.readProduct(productId);
+			ScheduleSQL.deleteDisbursementSchedule(loanProduct.getLoanId());
 			con = DatabaseHelper.getConnection();
 			stmt = con.prepareStatement(DELETE_LOAN_PRODUCT);
-			stmt.setInt(1, id);
+			stmt.setInt(1, productId);
 			stmt.executeUpdate();
-			ProductSQL.deleteProduct(id);
+			ProductSQL.deleteProduct(productId);
 			System.out.println("Product deleted successfully");
 
 		} catch (Exception e) {
-			//System.out.println("No schedule found for product id " + id);
+			// System.out.println("No schedule found for product id " + id);
 		} finally {
 			DbUtils.close(stmt, con);
 		}

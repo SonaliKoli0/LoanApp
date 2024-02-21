@@ -164,15 +164,23 @@ public class LoanProduct extends Product {
 	@Override
 	public void getCashflow(int productId) {
 		Product lp = (LoanProduct) LoanProductSQL.readProduct(productId);
-		Cashflow cs = new LoanCashflow();
-		ArrayList<Cashflow> cashflows = cs.generateCashflows(lp);
+		
+		ArrayList<Cashflow> cashflows =getListOfCashflows(lp); 
 		lp.setCashflows(cashflows);
+		System.out.println(LoanCashflow.PID + "\t" + LoanCashflow.FLOW + "\t" + Constants.DATE + "\t\t"
+				+ LoanCashflow.TYPE + "\t\t" + Constants.AMOUNT);
 		for (int i = 0; i < cashflows.size(); i++) {
 			LoanCashflow cashflow = (LoanCashflow) cashflows.get(i);
 			System.out.println(cashflow);
 		}
 
 	}
+	@Override
+	public ArrayList<Cashflow> getListOfCashflows(Product product){
+		Cashflow cs = new LoanCashflow();
+		return cs.generateCashflows(product);
+	}
+	
 
 	public Product buildProduct(HashMap<String, String> inputs) throws Exception {
 		try {
@@ -184,7 +192,10 @@ public class LoanProduct extends Product {
 			double totalValue = Double.parseDouble(inputs.get(Constants.TOTALVALUE));
 			String schedule = inputs.get(Constants.SCHEDULE);
 			String paymentOption = inputs.get(Constants.PAYMENTOPTION);
-			String[] scheduleArray = schedule.split("\\_");
+			if(paymentOption==null){
+				paymentOption=Constants.MONTHLYPAYMENT;
+			}
+			String[] scheduleArray = schedule.split("\\,");
 			List<Schedule> disbursementSchedule = new ArrayList<Schedule>();
 			for (String s : scheduleArray) {
 				Schedule sch = new Schedule();
@@ -199,7 +210,7 @@ public class LoanProduct extends Product {
 					disbursementSchedule, null, paymentOption);
 			return loanProduct;
 		} catch (Exception e) {
-			System.err.print(Constants.DETAILSERROR);
+			System.err.print(Constants.DETAILS_ERROR);
 			System.exit(0);
 		}
 		return null;
@@ -208,12 +219,46 @@ public class LoanProduct extends Product {
 	// Method for printing the loan product details
 	@Override
 	public String toString() {
-		return "LoanProduct{" +
-
-				"productId=" + this.getProductId() + ", loanId=" + getLoanId() + ", rate=" + rate + ",Start Date="
-				+ Util.formatDate(getStartDate()) + ",End Date=" + Util.formatDate(getEndDate()) + ", totalValue="
-				+ totalValue + ", disbursementSchedule= " + disbursementSchedule + " ," + "Payment Option: "
-				+ paymentOption + '}';
+		StringBuilder loanProduct= new StringBuilder();
+		loanProduct.append("\nLoan Product Details:\n");
+		loanProduct.append(Constants.PRODUCTID);
+		loanProduct.append("\t\t");
+		loanProduct.append(this.getProductId());
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.LOANID);
+		loanProduct.append("\t\t\t");
+		loanProduct.append(getLoanId());
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.RATE);
+		loanProduct.append("\t\t\t");
+		loanProduct.append(rate);
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.STARTDATE);
+		loanProduct.append("\t\t");
+		loanProduct.append(Util.formatDate(getStartDate()));
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.ENDDATE);
+		loanProduct.append("\t\t\t");
+		loanProduct.append(Util.formatDate(getEndDate()));
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.TOTALVALUE);
+		loanProduct.append("\t\t");
+		loanProduct.append(totalValue);
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.SCHEDULE);
+		loanProduct.append("\t\t");
+		loanProduct.append(disbursementSchedule);
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.PAYMENTOPTION);
+		loanProduct.append("\t\t");
+		loanProduct.append(paymentOption);
+		loanProduct.append("\n\n");
+		loanProduct.append(Constants.CASHFLOW);
+		loanProduct.append("\t\t");
+		loanProduct.append(this.getCashflows());
+		loanProduct.append("\n\n");
+		return loanProduct+"";
+		
 	}
 
 	public String getPaymentOption() {

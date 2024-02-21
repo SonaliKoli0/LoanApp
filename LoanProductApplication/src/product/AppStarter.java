@@ -22,7 +22,7 @@ public class AppStarter {
 			// Establish database connection
 			Connection connection = DatabaseHelper.getConnection();
 			// Perform database operations here
-			System.out.println("db connected");
+			System.out.println("APP Started");
 			// Close the connection
 			connection.close();
 		} catch (SQLException e) {

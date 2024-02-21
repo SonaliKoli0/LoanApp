@@ -26,9 +26,11 @@ public class Constants {
 	public static final String INTEREST = "INTEREST";
 	public static final String IN = "IN";
 	public static final String OUT = "OUT";
-	public static final String DETAILSERROR = "Enter Details correctly";
+	public static final String DETAILS_ERROR = "Enter Details correctly";
 	
 	public static final String ATMATURITY = "AT_MATURITY";
+	public static final String MONTHLYPAYMENT ="MONTHLY_PAYMENT";
+	public static final String LOANID = "LoanId";
 	
 	
 	

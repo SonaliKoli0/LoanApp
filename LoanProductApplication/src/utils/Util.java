@@ -20,7 +20,7 @@ public class Util {
 		try {
 			return new SimpleDateFormat(DDMMYYYY).parse(dateString);
 		} catch (ParseException e) {
-			System.err.print(Constants.DETAILSERROR);
+			System.err.print(Constants.DETAILS_ERROR);
 			System.exit(0);
 			return null;
 		}
@@ -31,7 +31,7 @@ public class Util {
 		try {
 			return new SimpleDateFormat(DDMMYYYY).format(date);
 		} catch (Exception e) {
-			System.err.print(Constants.DETAILSERROR);
+			System.err.print(Constants.DETAILS_ERROR);
 			System.exit(0);
 			return null;
 		}
@@ -83,7 +83,7 @@ public class Util {
 				return new SimpleDateFormat(YYYYMMDD).parse(currentMonth+"");
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				System.err.print(Constants.DETAILSERROR);
+				System.err.print(Constants.DETAILS_ERROR);
 				System.exit(0);
 			}
 		return null;
@@ -123,6 +123,10 @@ public class Util {
 			YearMonth.from(LocalDate.parse(endDate)));
 	return monthsBetween;
     }
+    public static java.sql.Date toSQLDate(String s){
+    	java.util.Date d = parseDate(s);
+    	return toSQLDate(d);
+    	}
 
     
 }
