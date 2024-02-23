@@ -20,7 +20,7 @@ public class Util {
 		try {
 			return new SimpleDateFormat(DDMMYYYY).parse(dateString);
 		} catch (ParseException e) {
-			System.err.print(Constants.DETAILSERROR);
+			System.err.print(Constants.DETAILS_ERROR);
 			System.exit(0);
 			return null;
 		}
@@ -31,7 +31,7 @@ public class Util {
 		try {
 			return new SimpleDateFormat(DDMMYYYY).format(date);
 		} catch (Exception e) {
-			System.err.print(Constants.DETAILSERROR);
+			System.err.print(Constants.DETAILS_ERROR);
 			System.exit(0);
 			return null;
 		}
@@ -51,6 +51,11 @@ public class Util {
 		return new java.util.Date(date.getTime());
 	}
 	
+	public static java.sql.Date toSQLDate(String s){
+		java.util.Date d = parseDate(s);
+		return toSQLDate(d);
+		}
+	
 	/**
 	 * calculate the number of days between 2 dates
 	 */
@@ -58,6 +63,8 @@ public class Util {
 	    long diff = d2.getTime() - d1.getTime();
 	    return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 	}
+	
+	
 	/**
 	 * calculate the number of days in given month and year
 	 */
@@ -83,7 +90,7 @@ public class Util {
 				return new SimpleDateFormat(YYYYMMDD).parse(currentMonth+"");
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				System.err.print(Constants.DETAILSERROR);
+				System.err.print(Constants.DETAILS_ERROR);
 				System.exit(0);
 			}
 		return null;

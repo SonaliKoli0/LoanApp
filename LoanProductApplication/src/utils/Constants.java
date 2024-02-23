@@ -4,7 +4,6 @@ public class Constants {
 	public static final String NEW = "NEW";
 	public static final String AMEND = "AMEND";
 	public static final String READ = "READ";
-	public static final String REMOVE = "REMOVE";
 	public static final String ACTION = "Action";
 	public static final String LOAN = "Loan";
 	public static final String CASHFLOW = "CASHFLOW";
@@ -16,7 +15,6 @@ public class Constants {
 	public static final String ENDDATE = "endDate";
 	public static final String STARTDATE = "startDate";
 	public static final String RATE = "rate";
-	public static final String ATMATURITY = "AT_MATURITY";
 	public static final String ID = "Id";
 	public static final String AMOUNT = "AMOUNT";
 	public static final String DATE = "DATE";
@@ -25,10 +23,10 @@ public class Constants {
 	public static final String INTEREST = "INTEREST";
 	public static final String IN = "IN";
 	public static final String OUT = "OUT";
-	public static final String DETAILSERROR = "Enter Details correctly";
-	
-	
-	
-	
-
+	public static final String DETAILS_ERROR = "Enter Details correctly";
+	public static final String ATMATURITY = "AT_MATURITY";
+	public static final String MONTHLYPAYMENT ="MONTHLY_PAYMENT";
+	public static final String CANCEL = "CANCEL";
+	public static final String STATUS = "STATUS";
+	public static final String UPDATE = "UPDATE";
 }

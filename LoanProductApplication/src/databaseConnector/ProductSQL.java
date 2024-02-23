@@ -7,10 +7,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.List;
 
 import databaseHelper.DatabaseHelper;
 import product.AppStarter;
+import product.LoanProduct;
 import product.Product;
+import product.Schedule;
 import utils.DbUtils;
 import utils.Util;
 
@@ -51,10 +54,9 @@ public class ProductSQL {
 
 			// Execute a separate query to retrieve the last inserted ID
 			try (ResultSet generatedKeys = stmt
-					.executeQuery("SELECT product_id FROM Product WHERE rownum = 1 ORDER BY product_id DESC")) {
+					.executeQuery("SELECT productId FROM Product WHERE rownum = 1 ORDER BY productId DESC")) {
 				if (generatedKeys.next()) {
-					id = generatedKeys.getLong("product_id");
-
+					id = generatedKeys.getLong("productId");
 					p.setProductId((int) id);
 				} else {
 					throw new SQLException("Inserting product failed, no ID obtained.");
@@ -81,17 +83,17 @@ public class ProductSQL {
 		Product p = null;
 		try {
 			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement("SELECT * FROM PRODUCT WHERE PRODUCT_ID=?");
+			stmt = con.prepareStatement("SELECT * FROM PRODUCT WHERE PRODUCTID=?");
 			stmt.setLong(1, id);
 
 			rs = stmt.executeQuery();
 
 			if (rs.next()) {
-				int productId = rs.getInt("PRODUCT_ID");
+				int productId = rs.getInt("PRODUCTID");
 				Date startDate = rs.getDate("STARTDATE");
 				String productType = rs.getString("PRODUCTTYPE");
 				Date endDate = rs.getDate("ENDDATE");
-				p = new Product(productId, productType, startDate, endDate, null);
+				p = new Product(productId, productType, startDate, endDate);
 
 			} else {
 				System.out.println("There is no product with id " + id);
@@ -116,32 +118,18 @@ public class ProductSQL {
 	 *  Method to delete the product details from the database based on the productId
 	 * @param id
 	 */
-	public static void deleteProduct(int id) {
-		PreparedStatement stmt = null;
-
-		Connection con = null;
-
-		try {
-			con = DatabaseHelper.getConnection();
-			stmt = con.prepareStatement("DELETE  FROM PRODUCT WHERE PRODUCT_ID=?");
-			stmt.setLong(1, id);
-
-			stmt.executeUpdate();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-
-			DbUtils.close(stmt, con);
+	public static void updateProduct(int id ) {
+		Date newEndDate = Util.toSQLDate((java.util.Date)AppStarter.inputs.get("endDate"));
+		LoanProduct lp = new LoanProduct();
+		lp = (LoanProduct) lp.readProduct(id);
+		List<Schedule> ds = lp.getDisbursementSchedule();
+		Date lastDisburesmentDate = Util.toSQLDate(ds.get(ds.size()-1).getDate());
+		if(lastDisburesmentDate.compareTo(newEndDate) != -1){
+			System.err.println("End Date should be after last Disbursement Date");
+			System.exit(0);
 		}
-
-	}
-
-	/**
-	 *  Method to delete the product details from the database based on the productId
-	 * @param id
-	 */
-	public static void updateProduct(int id) {
+		
+		
 		int index = 1;
 		PreparedStatement stmt = null;
 		Connection con = null;
@@ -150,17 +138,17 @@ public class ProductSQL {
 			if (AppStarter.inputs.containsKey("endDate")) {
 				sql += " endDate =?";
 			}
-			sql += " WHERE PRODUCT_ID = ?";
+			sql += " WHERE PRODUCTID = ?";
 
 			con = DatabaseHelper.getConnection();
 			stmt = con.prepareStatement(sql);
 
 			 if (AppStarter.inputs.containsKey("endDate")) {
-				stmt.setDate(index++, Util.toSQLDate(Util.parseDate(AppStarter.inputs.get("endDate"))));
+				stmt.setDate(index++, Util.toSQLDate((java.util.Date)AppStarter.inputs.get("endDate")));
 			}
 			stmt.setInt(index++, id);
 			stmt.executeUpdate();
-			System.out.println("product updated successfully");
+//			System.out.println("product updated successfully");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
